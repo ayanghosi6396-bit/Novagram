@@ -172,14 +172,15 @@ function showPage(page){
  });
  document.getElementById(page).classList.add('active');
 }
-
 function createPost(second=false){
+
+                                           
  const caption=document.getElementById(second?'caption2':'caption');
  const media=document.getElementById(second?'media2':'media');
  const file=media.files[0];
 
  if(!file){
-  alert('Please select a photo or video first!');
+  alert('Photo ya video select karo');
   return;
  }
 
@@ -198,6 +199,7 @@ function createPost(second=false){
   caption.value='';
   media.value='';
   document.getElementById('preview').innerHTML='';
+  alert('Post successfully added!');
   showPage('home');
  };
 
