@@ -1,298 +1,219 @@
 
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Novagram</title>
-
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box}
 body{
- background:#10091c;
- color:white;
+ margin:0;
  font-family:Arial,sans-serif;
- padding-bottom:75px;
-}
-header{
- background:#1b102c;
- padding:18px;
- display:flex;
- justify-content:space-between;
- align-items:center;
- border-bottom:1px solid #49216c;
-}
-.logo{font-size:27px;font-weight:bold;color:#c084fc}
-button{
- background:#8b35d1;
+ background:linear-gradient(135deg,#260044,#7025b9,#a66aff);
  color:white;
- border:0;
- padding:11px 16px;
- border-radius:9px;
- cursor:pointer;
+ min-height:100vh;
+ padding:20px;
 }
-.container{max-width:600px;margin:auto;padding:15px}
-h2{color:#d7a5ff;margin-bottom:15px}
-.stories{
- display:flex;gap:14px;overflow-x:auto;
- padding:12px 0 20px;
+.container{
+ max-width:430px;
+ margin:35px auto;
+ background:#321052;
+ padding:25px;
+ border-radius:20px;
+ box-shadow:0 8px 30px #16002588;
 }
-.story{
- min-width:62px;text-align:center;font-size:12px;
-}
-.circle{
- width:58px;height:58px;border-radius:50%;
- background:linear-gradient(45deg,#8b35d1,#ed70ff);
- padding:3px;margin-bottom:5px;
-}
-.circle div{
- background:#211333;border-radius:50%;
- width:100%;height:100%;
- display:grid;place-items:center;font-size:22px;
-}
-.card{
- background:#21152f;
- border:1px solid #49216c;
- border-radius:14px;
- padding:14px;
- margin-bottom:17px;
-}
+h1{text-align:center;color:#e5baff}
+h2{text-align:center}
 input,textarea{
- width:100%;padding:12px;
- border-radius:8px;border:1px solid #7541a0;
- background:#160d24;color:white;margin:8px 0;
+ width:100%;
+ padding:13px;
+ margin:8px 0;
+ border:0;
+ border-radius:9px;
+ background:#f5eaff;
+ font-size:15px;
 }
-.post-media{
- width:100%;max-height:420px;
- object-fit:contain;border-radius:10px;
- margin-top:12px;
- background:#10091c;
+button{
+ width:100%;
+ padding:13px;
+ margin:7px 0;
+ border:0;
+ border-radius:9px;
+ background:#bd83ff;
+ color:#260044;
+ font-size:16px;
+ font-weight:bold;
 }
-.actions{
- display:flex;gap:10px;margin-top:12px;
- flex-wrap:wrap;
+button:active{opacity:.8}
+.small{
+ text-align:center;
+ font-size:14px;
+ color:#e5caff;
 }
-.actions button{padding:9px 13px}
-nav{
- position:fixed;bottom:0;left:0;right:0;
- background:#1b102c;
- display:flex;justify-content:space-around;
- padding:15px 5px;
- border-top:1px solid #49216c;
+.hidden{display:none}
+.post{
+ background:#4b2170;
+ padding:15px;
+ margin:12px 0;
+ border-radius:12px;
+ overflow-wrap:anywhere;
 }
-nav button{background:transparent;font-size:19px;padding:5px}
-.page{display:none}
-.page.active{display:block}
-.user{font-weight:bold;color:#d7a5ff;margin-bottom:10px}
 </style>
 </head>
-
 <body>
 
-<header>
-<div class="logo">💜 Novagram</div>
-<button onclick="showPage('profile')">Profile</button>
-</header>
-
 <div class="container">
+<h1>💜 Novagram</h1>
+<p class="small">Connect • Share • Discover</p>
 
-<section id="home" class="page active">
-
-<h2>Stories</h2>
-<div class="stories">
-<div class="story"><div class="circle"><div>➕</div></div>Your Story</div>
-<div class="story"><div class="circle"><div>😊</div></div>Friends</div>
-<div class="story"><div class="circle"><div>🔥</div></div>Trending</div>
-<div class="story"><div class="circle"><div>💜</div></div>Novagram</div>
+<div id="auth">
+<h2>Welcome</h2>
+<input id="email" type="email" placeholder="Email Address">
+<input id="password" type="password" placeholder="Password">
+<button id="signup">Create Account</button>
+<button id="login">Login</button>
+<p id="message" class="small"></p>
 </div>
 
-<div class="card">
+<div id="profile" class="hidden">
+<h2>Your Profile</h2>
+<input id="name" placeholder="Your Name">
+<input id="username" placeholder="Username">
+<textarea id="bio" placeholder="Write your Bio"></textarea>
+<button id="saveProfile">Save Profile</button>
+<button id="logout">Logout</button>
+<p id="profileMessage" class="small"></p>
+
+<hr>
 <h2>Create Post</h2>
-<input id="caption" placeholder="What's on your mind?">
-<input type="file" id="media" accept="image/*,video/*">
-<button onclick="createPost()">📤 Post Now</button>
-<div id="preview"></div>
-</div>
-
-<h2>Community Feed</h2>
+<textarea id="postText" placeholder="What's on your mind?"></textarea>
+<button id="publish">Publish Post</button>
+<p id="postMessage" class="small"></p>
+<h2>Novagram Feed</h2>
 <div id="feed"></div>
-
-</section>
-
-<section id="reels" class="page">
-<h2>🎬 Novagram Reels</h2>
-<p>Watch and share your videos.</p>
-<div id="reelFeed"></div>
-</section>
-
-<section id="create" class="page">
-<h2>➕ Create New Post</h2>
-<div class="card">
-<input id="caption2" placeholder="Write something...">
-<input type="file" id="media2" accept="image/*,video/*">
-<button onclick="createPost(true)">Publish Post</button>
 </div>
-</section>
-
-<section id="ai" class="page">
-<h2>✨ AI Video Maker</h2>
-<div class="card">
-<p>Create your own AI video ideas.</p>
-<textarea id="aiPrompt" placeholder="Write your video idea..."></textarea>
-<button onclick="makeIdea()">Create Idea</button>
-<p id="aiResult"></p>
-</div>
-</section>
-
-<section id="profile" class="page">
-<h2>👤 My Profile</h2>
-<div class="card">
-<h2>💜 Novagram User</h2>
-<p>Welcome to my Novagram profile!</p>
-<p id="postCount">Posts: 0</p>
-</div>
-</section>
-
 </div>
 
-<nav>
-<button onclick="showPage('home')">🏠</button>
-<button onclick="showPage('reels')">🎬</button>
-<button onclick="showPage('create')">➕</button>
-<button onclick="showPage('ai')">✨</button>
-<button onclick="showPage('profile')">👤</button>
-</nav>
+<script type="module">
+import {initializeApp}
+from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 
-<script>
-let posts=[];
+import {
+ getAuth,createUserWithEmailAndPassword,
+ signInWithEmailAndPassword,onAuthStateChanged,signOut
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
-function showPage(page){
- document.querySelectorAll('.page').forEach(p=>{
-  p.classList.remove('active');
- });
- document.getElementById(page).classList.add('active');
-}
-function createPost(second=false){
+import {
+ getFirestore,doc,setDoc,getDoc,
+ collection,addDoc,onSnapshot,query,orderBy,serverTimestamp
+} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
-                                           
- const caption=document.getElementById(second?'caption2':'caption');
- const media=document.getElementById(second?'media2':'media');
- const file=media.files[0];
+const firebaseConfig = {
+ apiKey:"AIzaSyCC5J21io0PaOrOhVeoR9L92ostWLKI4GE",
+ authDomain:"novagram-68bd9.firebaseapp.com",
+ projectId:"novagram-68bd9",
+ storageBucket:"novagram-68bd9.firebasestorage.app",
+ messagingSenderId:"712062216370",
+ appId:"1:712062216370:web:c8325500a538873af8c1ab",
+ measurementId:"G-WV2MCHK3HS"
+};
 
- if(!file){
-  alert('Photo ya video select karo');
-  return;
- }
+const app=initializeApp(firebaseConfig);
+const auth=getAuth(app);
+const db=getFirestore(app);
 
- const reader=new FileReader();
+const $=id=>document.getElementById(id);
 
- reader.onload=function(e){
-  const post={
-   caption:caption.value,
-   src:e.target.result,
-   type:file.type,
-   likes:0
-  };
+$("signup").onclick=async()=>{
+ try{
+  await createUserWithEmailAndPassword(
+   auth,$("email").value,$("password").value
+  );
+  $("message").textContent="Account created!";
+ }catch(e){$("message").textContent=e.message}
+};
 
-  posts.unshift(post);
-  renderPosts();
-  caption.value='';
-  media.value='';
-  document.getElementById('preview').innerHTML='';
-  alert('Post successfully added!');
-  showPage('home');
- };
+$("login").onclick=async()=>{
+ try{
+  await signInWithEmailAndPassword(
+   auth,$("email").value,$("password").value
+  );
+ }catch(e){$("message").textContent=e.message}
+};
 
- reader.readAsDataURL(file);
-}
+onAuthStateChanged(auth,async user=>{
+ $("auth").classList.toggle("hidden",!!user);
+ $("profile").classList.toggle("hidden",!user);
+ if(!user)return;
 
-document.getElementById('media').addEventListener('change',function(){
- showPreview(this,'preview');
-});
-
-document.getElementById('media2').addEventListener('change',function(){
- showPreview(this,'preview');
-});
-
-function showPreview(input,target){
- const file=input.files[0];
- if(!file)return;
- const url=URL.createObjectURL(file);
- const el=document.getElementById(target);
-
- el.innerHTML=file.type.startsWith('video')
- ? `<video class="post-media" controls src="${url}"></video>`
- : `<img class="post-media" src="${url}">`;
-}
-
-function renderPosts(){
- const feed=document.getElementById('feed');
- const reels=document.getElementById('reelFeed');
-
- feed.innerHTML='';
- reels.innerHTML='';
-
- posts.forEach((post,index)=>{
-  const media=post.type.startsWith('video')
-  ? `<video class="post-media" controls src="${post.src}"></video>`
-  : `<img class="post-media" src="${post.src}">`;
-
-  const html=`
-  <div class="card">
-   <div class="user">💜 Novagram User</div>
-   <p>${escapeText(post.caption)}</p>
-   ${media}
-   <div class="actions">
-    <button onclick="likePost(${index})">❤️ ${post.likes}</button>
-    <button onclick="commentPost(${index})">💬 Comment</button>
-    <button onclick="followUser()">➕ Follow</button>
-   </div>
-  </div>`;
-
-  feed.innerHTML+=html;
-
-  if(post.type.startsWith('video')){
-   reels.innerHTML+=html;
+ try{
+  const ref=doc(db,"Users",user.uid);
+  const snap=await getDoc(ref);
+  if(snap.exists()){
+   const d=snap.data();
+   $("name").value=d.Name||"";
+   $("username").value=d.username||"";
+   $("bio").value=d.Bio||"";
   }
+  loadFeed();
+ }catch(e){
+  $("profileMessage").textContent="Database access error: "+e.message;
+ }
+});
+
+$("saveProfile").onclick=async()=>{
+ const user=auth.currentUser;
+ if(!user)return;
+ try{
+  await setDoc(doc(db,"Users",user.uid),{
+   Name:$("name").value.trim(),
+   username:$("username").value.trim(),
+   Bio:$("bio").value.trim(),
+   email:user.email,
+   createdAt:serverTimestamp()
+  },{merge:true});
+  $("profileMessage").textContent="Profile saved!";
+ }catch(e){$("profileMessage").textContent=e.message}
+};
+
+$("publish").onclick=async()=>{
+ const user=auth.currentUser;
+ const content=$("postText").value.trim();
+ if(!user||!content)return;
+ try{
+  await addDoc(collection(db,"Posts"),{
+   text:content,
+   uid:user.uid,
+   email:user.email,
+   createdAt:serverTimestamp()
+  });
+  $("postText").value="";
+  $("postMessage").textContent="Post published!";
+ }catch(e){$("postMessage").textContent=e.message}
+};
+
+let unsubscribe=null;
+function loadFeed(){
+ if(unsubscribe)unsubscribe();
+ const q=query(collection(db,"Posts"),orderBy("createdAt","desc"));
+ unsubscribe=onSnapshot(q,snapshot=>{
+  $("feed").innerHTML="";
+  snapshot.forEach(item=>{
+   const d=item.data();
+   const post=document.createElement("div");
+   post.className="post";
+   post.textContent=d.text||"";
+   $("feed").appendChild(post);
+  });
+ },error=>{
+  $("postMessage").textContent=error.message;
  });
-
- document.getElementById('postCount').innerText='Posts: '+posts.length;
 }
 
-function escapeText(value){
- const div=document.createElement('div');
- div.textContent=value;
- return div.innerHTML;
-}
-
-function likePost(index){
- posts[index].likes++;
- renderPosts();
-}
-
-function commentPost(index){
- const comment=prompt('Write your comment:');
- if(comment){
-  alert('Comment added: '+comment);
- }
-}
-
-function followUser(){
- alert('You are following this user!');
-}
-
-function makeIdea(){
- const promptText=document.getElementById('aiPrompt').value;
- if(!promptText.trim()){
-  alert('Please write your video idea!');
-  return;
- }
- document.getElementById('aiResult').innerText=
- 'Your video idea: '+promptText+
- '\n\nAI video generation will be connected in a future version.';
-}
+$("logout").onclick=()=>signOut(auth);
 </script>
-
 </body>
 </html>
 
