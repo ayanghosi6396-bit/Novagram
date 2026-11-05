@@ -6,64 +6,46 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Novagram</title>
+
 <style>
 *{box-sizing:border-box}
 body{
- margin:0;
- font-family:Arial,sans-serif;
+ margin:0;font-family:Arial,sans-serif;
  background:linear-gradient(135deg,#260044,#7025b9,#a66aff);
- color:white;
- min-height:100vh;
- padding:20px;
+ color:white;min-height:100vh;padding:20px;
 }
 .container{
- max-width:430px;
- margin:35px auto;
- background:#321052;
- padding:25px;
- border-radius:20px;
- box-shadow:0 8px 30px #16002588;
+ max-width:430px;margin:35px auto;background:#321052;
+ padding:25px;border-radius:20px;box-shadow:0 8px 30px #16002588;
 }
 h1{text-align:center;color:#e5baff}
 h2{text-align:center}
 input,textarea{
- width:100%;
- padding:13px;
- margin:8px 0;
- border:0;
- border-radius:9px;
- background:#f5eaff;
- font-size:15px;
+ width:100%;padding:13px;margin:8px 0;border:0;
+ border-radius:9px;background:#f5eaff;font-size:15px;
 }
 button{
- width:100%;
- padding:13px;
- margin:7px 0;
- border:0;
- border-radius:9px;
- background:#bd83ff;
- color:#260044;
- font-size:16px;
- font-weight:bold;
+ width:100%;padding:13px;margin:7px 0;border:0;
+ border-radius:9px;background:#bd83ff;color:#260044;
+ font-size:16px;font-weight:bold;
 }
-button:active{opacity:.8}
-.small{
- text-align:center;
- font-size:14px;
- color:#e5caff;
-}
+.small{text-align:center;font-size:14px;color:#e5caff}
 .hidden{display:none}
 .post{
- background:#4b2170;
- padding:15px;
- margin:12px 0;
- border-radius:12px;
- overflow-wrap:anywhere;
+ background:#4b2170;padding:15px;margin:12px 0;
+ border-radius:12px;overflow-wrap:anywhere;
 }
+.post-text{white-space:pre-wrap}
+.like-button{background:#e5baff}
+.comment{
+ background:#321052;padding:9px;margin:7px 0;
+ border-radius:8px;font-size:14px;
+}
+.comment-input{margin-top:10px}
 </style>
 </head>
-<body>
 
+<body>
 <div class="container">
 <h1>💜 Novagram</h1>
 <p class="small">Connect • Share • Discover</p>
@@ -91,6 +73,7 @@ button:active{opacity:.8}
 <textarea id="postText" placeholder="What's on your mind?"></textarea>
 <button id="publish">Publish Post</button>
 <p id="postMessage" class="small"></p>
+
 <h2>Novagram Feed</h2>
 <div id="feed"></div>
 </div>
@@ -106,7 +89,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
- getFirestore,doc,setDoc,getDoc,
+ getFirestore,doc,setDoc,getDoc,deleteDoc,
  collection,addDoc,onSnapshot,query,orderBy,serverTimestamp
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
@@ -123,7 +106,6 @@ const firebaseConfig = {
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
-
 const $=id=>document.getElementById(id);
 
 $("signup").onclick=async()=>{
@@ -146,11 +128,17 @@ $("login").onclick=async()=>{
 onAuthStateChanged(auth,async user=>{
  $("auth").classList.toggle("hidden",!!user);
  $("profile").classList.toggle("hidden",!user);
- if(!user)return;
+
+ if(!user){
+  if(unsubscribe)unsubscribe();
+  clearPostListeners();
+  return;
+ }
 
  try{
   const ref=doc(db,"Users",user.uid);
   const snap=await getDoc(ref);
+
   if(snap.exists()){
    const d=snap.data();
    $("name").value=d.Name||"";
@@ -159,13 +147,14 @@ onAuthStateChanged(auth,async user=>{
   }
   loadFeed();
  }catch(e){
-  $("profileMessage").textContent="Database access error: "+e.message;
+  $("profileMessage").textContent="Database error: "+e.message;
  }
 });
 
 $("saveProfile").onclick=async()=>{
  const user=auth.currentUser;
  if(!user)return;
+
  try{
   await setDoc(doc(db,"Users",user.uid),{
    Name:$("name").value.trim(),
@@ -174,6 +163,7 @@ $("saveProfile").onclick=async()=>{
    email:user.email,
    createdAt:serverTimestamp()
   },{merge:true});
+
   $("profileMessage").textContent="Profile saved!";
  }catch(e){$("profileMessage").textContent=e.message}
 };
@@ -181,32 +171,163 @@ $("saveProfile").onclick=async()=>{
 $("publish").onclick=async()=>{
  const user=auth.currentUser;
  const content=$("postText").value.trim();
+
  if(!user||!content)return;
+
  try{
   await addDoc(collection(db,"Posts"),{
    text:content,
    uid:user.uid,
-   email:user.email,
    createdAt:serverTimestamp()
   });
+
   $("postText").value="";
   $("postMessage").textContent="Post published!";
  }catch(e){$("postMessage").textContent=e.message}
 };
 
 let unsubscribe=null;
+let postListeners=[];
+
+function clearPostListeners(){
+ postListeners.forEach(stop=>stop());
+ postListeners=[];
+}
+
 function loadFeed(){
  if(unsubscribe)unsubscribe();
+ clearPostListeners();
+
  const q=query(collection(db,"Posts"),orderBy("createdAt","desc"));
+
  unsubscribe=onSnapshot(q,snapshot=>{
+  clearPostListeners();
   $("feed").innerHTML="";
+
   snapshot.forEach(item=>{
    const d=item.data();
+   const postId=item.id;
+   const user=auth.currentUser;
+
    const post=document.createElement("div");
    post.className="post";
-   post.textContent=d.text||"";
+
+   const heading=document.createElement("p");
+   heading.textContent="💜 Novagram User";
+   post.appendChild(heading);
+
+   const content=document.createElement("p");
+   content.className="post-text";
+   content.textContent=d.text||"";
+   post.appendChild(content);
+
+   // Like button
+   const likeButton=document.createElement("button");
+   likeButton.className="like-button";
+   likeButton.textContent="🤍 Like";
+
+   const likeCount=document.createElement("p");
+   likeCount.className="small";
+   likeCount.textContent="Likes: 0";
+
+   post.appendChild(likeButton);
+   post.appendChild(likeCount);
+
+   // Comments section
+   const commentTitle=document.createElement("h3");
+   commentTitle.textContent="💬 Comments";
+   post.appendChild(commentTitle);
+
+   const commentsBox=document.createElement("div");
+   post.appendChild(commentsBox);
+
+   const commentInput=document.createElement("textarea");
+   commentInput.className="comment-input";
+   commentInput.placeholder="Write a comment...";
+
+   const commentButton=document.createElement("button");
+   commentButton.textContent="Send Comment";
+
+   post.appendChild(commentInput);
+   post.appendChild(commentButton);
+
    $("feed").appendChild(post);
+
+   const likesRef=collection(db,"Posts",postId,"Likes");
+
+   // Live like count and current user's like
+   const stopLikes=onSnapshot(likesRef,likeSnap=>{
+    likeCount.textContent="Likes: "+likeSnap.size;
+
+    const liked=likeSnap.docs.some(x=>x.id===user.uid);
+    likeButton.textContent=liked?"💜 Liked":"🤍 Like";
+   },error=>{
+    likeCount.textContent="Likes unavailable";
+   });
+
+   postListeners.push(stopLikes);
+
+   likeButton.onclick=async()=>{
+    try{
+     const myLike=doc(db,"Posts",postId,"Likes",user.uid);
+     const existing=await getDoc(myLike);
+
+     if(existing.exists()){
+      await deleteDoc(myLike);
+     }else{
+      await setDoc(myLike,{
+       uid:user.uid,
+       createdAt:serverTimestamp()
+      });
+     }
+    }catch(e){
+     $("postMessage").textContent="Like error: "+e.message;
+    }
+   };
+
+   // Live comments
+   const commentsQuery=query(
+    collection(db,"Posts",postId,"Comments"),
+    orderBy("createdAt","asc")
+   );
+
+   const stopComments=onSnapshot(commentsQuery,commentSnap=>{
+    commentsBox.innerHTML="";
+
+    commentSnap.forEach(commentDoc=>{
+     const c=commentDoc.data();
+     const line=document.createElement("div");
+     line.className="comment";
+     line.textContent="💬 "+(c.text||"");
+     commentsBox.appendChild(line);
+    });
+   },error=>{
+    commentsBox.textContent="Comments unavailable";
+   });
+
+   postListeners.push(stopComments);
+
+   commentButton.onclick=async()=>{
+    const text=commentInput.value.trim();
+    if(!text)return;
+
+    try{
+     await addDoc(
+      collection(db,"Posts",postId,"Comments"),
+      {
+       text:text,
+       uid:user.uid,
+       createdAt:serverTimestamp()
+      }
+     );
+
+     commentInput.value="";
+    }catch(e){
+     $("postMessage").textContent="Comment error: "+e.message;
+    }
+   };
   });
+
  },error=>{
   $("postMessage").textContent=error.message;
  });
@@ -216,6 +337,4 @@ $("logout").onclick=()=>signOut(auth);
 </script>
 </body>
 </html>
-
-
 
