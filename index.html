@@ -18,8 +18,11 @@ button{padding:11px 16px;background:#7025c9;color:white;border:0;border-radius:9
 .secondary{background:#eee5ff;color:#54208c}
 .hidden{display:none}
 .post{border-bottom:1px solid #eee;padding:12px 0}
-.post img{width:100%;max-height:400px;object-fit:contain}
+.post img.post-photo{width:100%;max-height:400px;object-fit:contain}
 .status{font-size:13px;color:#7025c9}
+.avatar{width:55px;height:55px;border-radius:50%;object-fit:cover;background:#eadcff;vertical-align:middle;margin-right:10px}
+.post-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px}
+.preview{width:90px;height:90px;border-radius:50%;object-fit:cover;display:block;margin:10px 0}
 </style>
 </head>
 <body>
@@ -28,6 +31,7 @@ button{padding:11px 16px;background:#7025c9;color:white;border:0;border-radius:9
 Connect • Share • Discover
 </header>
 <main>
+
 <section id="auth" class="card">
 <h2>Welcome to Novagram</h2>
 <input id="email" type="email" placeholder="Email">
@@ -40,6 +44,8 @@ Connect • Share • Discover
 <div id="appArea" class="hidden">
 <section class="card">
 <h2>Your Profile</h2>
+<img id="avatarPreview" class="preview" alt="Profile photo">
+<input id="profilePhoto" type="file" accept="image/*">
 <input id="name" placeholder="Your Name">
 <input id="username" placeholder="Username">
 <textarea id="bio" placeholder="Write your Bio"></textarea>
@@ -65,9 +71,18 @@ Connect • Share • Discover
 
 <script type="module">
 import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {getFirestore,doc,setDoc,getDoc,addDoc,collection,query,orderBy,onSnapshot,serverTimestamp,deleteDoc,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-import {getStorage,ref,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
+import {
+getAuth,createUserWithEmailAndPassword,
+signInWithEmailAndPassword,onAuthStateChanged,signOut
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+getFirestore,doc,setDoc,getDoc,addDoc,
+collection,query,orderBy,onSnapshot,
+serverTimestamp,deleteDoc,getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {
+getStorage,ref,uploadBytes,getDownloadURL
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig={
 apiKey:"AIzaSyCC5J21io0PaOrOhVeoR9L92ostWLKI4GE",
@@ -83,23 +98,55 @@ const auth=getAuth(app);
 const db=getFirestore(app);
 const storage=getStorage(app);
 const $=id=>document.getElementById(id);
-let user=null,profile={name:"Novagram User",username:"user",bio:""};
+
+let user=null;
+let profile={
+name:"Novagram User",
+username:"user",
+bio:"",
+avatarURL:""
+};
 let stopFeed=null;
 
-function msg(id,text){$(id).textContent=text}
-function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function error(e){return e.code==="auth/email-already-in-use"?"Email already registered":e.code==="auth/invalid-credential"?"Email or password incorrect":e.message}
+function msg(id,text){
+$(id).textContent=text;
+}
+
+function safe(s){
+return String(s??"").replace(/[&<>"']/g,c=>({
+"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+}[c]));
+}
+
+function error(e){
+return e.code==="auth/email-already-in-use"?"Email already registered":
+e.code==="auth/invalid-credential"?"Email or password incorrect":
+e.message;
+}
+
+async function uploadImage(file,path){
+if(!file || !file.type.startsWith("image/") || file.size>5*1024*1024){
+throw new Error("Image must be under 5 MB.");
+}
+const imageRef=ref(storage,path);
+await uploadBytes(imageRef,file);
+return await getDownloadURL(imageRef);
+}
 
 $("signup").onclick=async()=>{
 try{
-await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+await createUserWithEmailAndPassword(
+auth,$("email").value.trim(),$("password").value
+);
 msg("authMsg","Account created!");
 }catch(e){msg("authMsg",error(e))}
 };
 
 $("login").onclick=async()=>{
 try{
-await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+await signInWithEmailAndPassword(
+auth,$("email").value.trim(),$("password").value
+);
 msg("authMsg","Login successful!");
 }catch(e){msg("authMsg",error(e))}
 };
@@ -110,107 +157,228 @@ onAuthStateChanged(auth,async u=>{
 user=u;
 $("auth").classList.toggle("hidden",!!u);
 $("appArea").classList.toggle("hidden",!u);
-if(!u){if(stopFeed)stopFeed();return}
+
+if(!u){
+if(stopFeed)stopFeed();
+return;
+}
+
+try{
 await loadProfile();
 startFeed();
+}catch(e){
+msg("profileMsg",error(e));
+}
 });
 
 async function loadProfile(){
-let s=await getDoc(doc(db,"Users",user.uid));
-if(s.exists())profile={...profile,...s.data()};
-else await setDoc(doc(db,"Users",user.uid),profile);
+const s=await getDoc(doc(db,"Users",user.uid));
+
+if(s.exists()){
+profile={...profile,...s.data()};
+}else{
+await setDoc(doc(db,"Users",user.uid),profile);
+}
+
 $("name").value=profile.name||"";
 $("username").value=profile.username||"";
 $("bio").value=profile.bio||"";
+$("avatarPreview").src=profile.avatarURL||"";
 }
+
+$("profilePhoto").onchange=()=>{
+const file=$("profilePhoto").files[0];
+if(file){
+$("avatarPreview").src=URL.createObjectURL(file);
+}
+};
 
 $("saveProfile").onclick=async()=>{
 try{
-profile={name:$("name").value.trim(),username:$("username").value.trim(),bio:$("bio").value.trim()};
+let avatarURL=profile.avatarURL||"";
+const file=$("profilePhoto").files[0];
+
+if(file){
+avatarURL=await uploadImage(
+file,"profiles/"+user.uid+"/profile_"+Date.now()
+);
+}
+
+profile={
+name:$("name").value.trim(),
+username:$("username").value.trim(),
+bio:$("bio").value.trim(),
+avatarURL
+};
+
 await setDoc(doc(db,"Users",user.uid),profile,{merge:true});
+$("avatarPreview").src=avatarURL||"";
+$("profilePhoto").value="";
 msg("profileMsg","Profile saved 💜");
-}catch(e){msg("profileMsg",error(e))}
+}catch(e){
+msg("profileMsg",error(e));
+}
 };
 
 $("publish").onclick=async()=>{
-let text=$("postText").value.trim(),file=$("photo").files[0];
-if(!text&&!file){msg("postMsg","Write something or select a photo.");return}
-if(file&&(!file.type.startsWith("image/")||file.size>5*1024*1024)){msg("postMsg","Choose an image under 5 MB.");return}
+const text=$("postText").value.trim();
+const file=$("photo").files[0];
+
+if(!text&&!file){
+msg("postMsg","Write something or select a photo.");
+return;
+}
+
 try{
 let imageUrl="";
+
 if(file){
-let r=ref(storage,"posts/"+user.uid+"/"+Date.now()+"_"+file.name);
-await uploadBytes(r,file);
-imageUrl=await getDownloadURL(r);
+imageUrl=await uploadImage(
+file,"posts/"+user.uid+"/"+Date.now()+"_"+file.name
+);
 }
+
 await addDoc(collection(db,"Posts"),{
-uid:user.uid,name:profile.name||"Novagram User",
-username:profile.username||"user",text,imageUrl,
+uid:user.uid,
+name:profile.name||"Novagram User",
+username:profile.username||"user",
+avatarURL:profile.avatarURL||"",
+text,
+imageUrl,
 createdAt:serverTimestamp()
 });
+
 $("postText").value="";
 $("photo").value="";
 msg("postMsg","Post published! 💜");
-}catch(e){msg("postMsg",error(e))}
+}catch(e){
+msg("postMsg",error(e));
+}
 };
 
 function startFeed(){
 if(stopFeed)stopFeed();
-stopFeed=onSnapshot(query(collection(db,"Posts"),orderBy("createdAt","desc")),s=>{
+
+stopFeed=onSnapshot(
+query(collection(db,"Posts"),orderBy("createdAt","desc")),
+s=>{
 $("feed").innerHTML="";
-if(s.empty){$("feed").textContent="No posts yet. Welcome to Novagram!";return}
+
+if(s.empty){
+$("feed").textContent="No posts yet. Welcome to Novagram!";
+return;
+}
+
 s.forEach(p=>{
-let d=p.data(),id=p.id,el=document.createElement("div");
+const d=p.data();
+const id=p.id;
+const el=document.createElement("div");
 el.className="post";
-el.innerHTML=`<b>💜 ${safe(d.name)}</b><p>@${safe(d.username)}</p><p>${safe(d.text)}</p>${d.imageUrl?`<img src="${safe(d.imageUrl)}">`:""}<button class="secondary like">🤍 Like</button><span class="likes">Loading...</span><button class="secondary toggle">💬 Comments</button><div class="comments hidden"><div class="commentList"></div><input class="commentText" placeholder="Write a comment..."><button class="send">Send</button></div>`;
+
+el.innerHTML=`
+<div>
+<img class="post-avatar" src="${safe(d.avatarURL||"")}" alt="">
+<b>💜 ${safe(d.name||"Novagram User")}</b>
+</div>
+<p>@${safe(d.username||"user")}</p>
+<p>${safe(d.text||"")}</p>
+${d.imageUrl?`<img class="post-photo" src="${safe(d.imageUrl)}" alt="Post photo">`:""}
+<button class="secondary like">🤍 Like</button>
+<span class="likes">Loading...</span>
+<button class="secondary toggle">💬 Comments</button>
+<div class="comments hidden">
+<div class="commentList"></div>
+<input class="commentText" placeholder="Write a comment...">
+<button class="send">Send</button>
+</div>
+`;
+
 $("feed").appendChild(el);
+
 const likeRef=doc(db,"Posts",id,"Likes",user.uid);
 const likes=collection(db,"Posts",id,"Likes");
+
 async function refresh(){
 try{
-let [mine,all]=await Promise.all([getDoc(likeRef),getDocs(likes)]);
-el.querySelector(".like").textContent=mine.exists()?"💜 Liked":"🤍 Like";
-el.querySelector(".likes").textContent=" "+all.size+" Likes";
-}catch(e){el.querySelector(".likes").textContent="Likes unavailable"}
+const [mine,all]=await Promise.all([
+getDoc(likeRef),getDocs(likes)
+]);
+
+el.querySelector(".like").textContent=
+mine.exists()?"💜 Liked":"🤍 Like";
+
+el.querySelector(".likes").textContent=
+" "+all.size+" Likes";
+}catch(e){
+el.querySelector(".likes").textContent="Likes unavailable";
 }
+}
+
 el.querySelector(".like").onclick=async()=>{
 try{
-let mine=await getDoc(likeRef);
-if(mine.exists())await deleteDoc(likeRef);
-else await setDoc(likeRef,{uid:user.uid});
+const mine=await getDoc(likeRef);
+if(mine.exists()){
+await deleteDoc(likeRef);
+}else{
+await setDoc(likeRef,{uid:user.uid});
+}
 await refresh();
 }catch(e){alert(error(e))}
 };
+
 refresh();
 
-const box=el.querySelector(".comments"),list=el.querySelector(".commentList");
+const box=el.querySelector(".comments");
+const list=el.querySelector(".commentList");
+
 async function loadComments(){
 try{
-let cs=await getDocs(query(collection(db,"Posts",id,"Comments"),orderBy("createdAt","asc")));
+const cs=await getDocs(query(
+collection(db,"Posts",id,"Comments"),
+orderBy("createdAt","asc")
+));
+
 list.innerHTML="";
 cs.forEach(c=>{
-let x=document.createElement("p");
+const x=document.createElement("p");
 x.innerHTML="<b>"+safe(c.data().name)+"</b>: "+safe(c.data().text);
 list.appendChild(x);
 });
-}catch(e){list.textContent="Comments unavailable"}
+}catch(e){
+list.textContent="Comments unavailable";
 }
-el.querySelector(".toggle").onclick=()=>{box.classList.toggle("hidden");loadComments()};
+}
+
+el.querySelector(".toggle").onclick=()=>{
+box.classList.toggle("hidden");
+loadComments();
+};
+
 el.querySelector(".send").onclick=async()=>{
-let input=el.querySelector(".commentText"),t=input.value.trim();
+const input=el.querySelector(".commentText");
+const t=input.value.trim();
 if(!t)return;
+
 try{
-await addDoc(collection(db,"Posts",id,"Comments"),{uid:user.uid,name:profile.name||"User",text:t,createdAt:serverTimestamp()});
+await addDoc(collection(db,"Posts",id,"Comments"),{
+uid:user.uid,
+name:profile.name||"User",
+text:t,
+createdAt:serverTimestamp()
+});
 input.value="";
 loadComments();
 }catch(e){alert(error(e))}
 };
 });
-},e=>{$("feed").textContent=error(e)});
+},
+e=>{$("feed").textContent=error(e)}
+);
 }
 </script>
 </body>
 </html>
+
 
 
 
