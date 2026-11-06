@@ -1,87 +1,66 @@
 
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Novagram</title>
-
 <style>
 *{box-sizing:border-box}
-body{
- margin:0;font-family:Arial,sans-serif;
- background:linear-gradient(135deg,#260044,#7025b9,#a66aff);
- color:white;min-height:100vh;padding:20px;
-}
-.container{
- max-width:430px;margin:35px auto;background:#321052;
- padding:25px;border-radius:20px;box-shadow:0 8px 30px #16002588;
-}
-h1{text-align:center;color:#e5baff}
-h2{text-align:center}
-input,textarea{
- width:100%;padding:13px;margin:8px 0;border:0;
- border-radius:9px;background:#f5eaff;font-size:15px;
-}
-button{
- width:100%;padding:13px;margin:7px 0;border:0;
- border-radius:9px;background:#bd83ff;color:#260044;
- font-size:16px;font-weight:bold;
-}
-.small{text-align:center;font-size:14px;color:#e5caff}
+body{margin:0;background:linear-gradient(135deg,#260044,#7025b9,#a66aff);color:white;font-family:Arial,sans-serif;min-height:100vh;padding:15px}
+.container{max-width:500px;margin:20px auto;background:#321052;padding:20px;border-radius:20px;box-shadow:0 8px 30px #16002588}
+h1,h2{text-align:center}
+.small{text-align:center;color:#e5caff;font-size:14px}
+input,textarea{width:100%;padding:13px;margin:7px 0;border:0;border-radius:9px;font-size:15px}
+textarea{min-height:75px;resize:vertical}
+button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:9px;background:#bd83ff;color:#260044;font-size:16px;font-weight:bold}
+button:disabled{opacity:.5}
+.post{background:#4b2170;padding:15px;margin:12px 0;border-radius:12px;overflow-wrap:anywhere}
+.post small{color:#e5caff}
+.actions{display:flex;gap:8px}
+.actions button{flex:1}
+.comment{background:#321052;padding:9px;margin:7px 0;border-radius:8px}
 .hidden{display:none}
-.post{
- background:#4b2170;padding:15px;margin:12px 0;
- border-radius:12px;overflow-wrap:anywhere;
-}
-.post-text{white-space:pre-wrap}
-.like-button{background:#e5baff}
-.comment{
- background:#321052;padding:9px;margin:7px 0;
- border-radius:8px;font-size:14px;
-}
-.comment-input{margin-top:10px}
+hr{border:0;border-top:1px solid #8050a0;margin:18px 0}
 </style>
 </head>
-
 <body>
 <div class="container">
 <h1>💜 Novagram</h1>
 <p class="small">Connect • Share • Discover</p>
 
 <div id="auth">
-<h2>Welcome</h2>
+<h2>स्वागत है!</h2>
 <input id="email" type="email" placeholder="Email Address">
 <input id="password" type="password" placeholder="Password">
-<button id="signup">Create Account</button>
-<button id="login">Login</button>
+<button id="signup">नया अकाउंट बनाएँ</button>
+<button id="login">लॉगिन करें</button>
 <p id="message" class="small"></p>
 </div>
 
-<div id="profile" class="hidden">
-<h2>Your Profile</h2>
-<input id="name" placeholder="Your Name">
+<div id="app" class="hidden">
+<h2>आपकी प्रोफाइल</h2>
+<input id="name" placeholder="आपका नाम">
 <input id="username" placeholder="Username">
-<textarea id="bio" placeholder="Write your Bio"></textarea>
-<button id="saveProfile">Save Profile</button>
-<button id="logout">Logout</button>
+<textarea id="bio" placeholder="अपने बारे में लिखें"></textarea>
+<button id="saveProfile">प्रोफाइल सेव करें</button>
+<button id="logout">लॉगआउट</button>
 <p id="profileMessage" class="small"></p>
 
 <hr>
-<h2>Create Post</h2>
-<textarea id="postText" placeholder="What's on your mind?"></textarea>
-<button id="publish">Publish Post</button>
+<h2>पोस्ट बनाएँ</h2>
+<textarea id="postText" placeholder="आपके मन में क्या है?"></textarea>
+<button id="publish">पोस्ट प्रकाशित करें</button>
 <p id="postMessage" class="small"></p>
 
-<h2>Novagram Feed</h2>
-<div id="feed"></div>
+<hr>
+<h2>💜 Novagram Feed</h2>
+<div id="feed">पोस्ट लोड हो रही हैं...</div>
 </div>
 </div>
 
 <script type="module">
-import {initializeApp}
-from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
 
 import {
  getAuth,createUserWithEmailAndPassword,
@@ -89,11 +68,12 @@ import {
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
 
 import {
- getFirestore,doc,setDoc,getDoc,deleteDoc,
- collection,addDoc,onSnapshot,query,orderBy,serverTimestamp
+ getFirestore,doc,setDoc,getDoc,collection,
+ addDoc,onSnapshot,updateDoc,arrayUnion,arrayRemove,
+ serverTimestamp
 } from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
 
-const firebaseConfig = {
+const firebaseConfig={
  apiKey:"AIzaSyCC5J21io0PaOrOhVeoR9L92ostWLKI4GE",
  authDomain:"novagram-68bd9.firebaseapp.com",
  projectId:"novagram-68bd9",
@@ -106,270 +86,206 @@ const firebaseConfig = {
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
+
 const $=id=>document.getElementById(id);
+let currentUser=null;
+let stopFeed=null;
+
+function message(id,text){
+ $(id).textContent=text;
+}
 
 $("signup").onclick=async()=>{
  try{
-  await createUserWithEmailAndPassword(
-   auth,$("email").value,$("password").value
-  );
-  $("message").textContent="Account created!";
- }catch(e){$("message").textContent=e.message}
+  const email=$("email").value.trim();
+  const password=$("password").value;
+  if(!email||password.length<6){
+   message("message","ईमेल और कम से कम 6 अक्षर का पासवर्ड डालें।");
+   return;
+  }
+  await createUserWithEmailAndPassword(auth,email,password);
+  message("message","अकाउंट बन गया!");
+ }catch(e){message("message",e.message);}
 };
 
 $("login").onclick=async()=>{
  try{
   await signInWithEmailAndPassword(
-   auth,$("email").value,$("password").value
+   auth,$("email").value.trim(),$("password").value
   );
- }catch(e){$("message").textContent=e.message}
+ }catch(e){message("message",e.message);}
 };
 
 onAuthStateChanged(auth,async user=>{
+ currentUser=user;
  $("auth").classList.toggle("hidden",!!user);
- $("profile").classList.toggle("hidden",!user);
+ $("app").classList.toggle("hidden",!user);
 
- if(!user){
-  if(unsubscribe)unsubscribe();
-  clearPostListeners();
-  return;
- }
+ if(stopFeed){stopFeed();stopFeed=null;}
 
- try{
-  const ref=doc(db,"Users",user.uid);
-  const snap=await getDoc(ref);
-
-  if(snap.exists()){
-   const d=snap.data();
-   $("name").value=d.Name||"";
-   $("username").value=d.username||"";
-   $("bio").value=d.Bio||"";
+ if(user){
+  try{
+   const ref=doc(db,"Users",user.uid);
+   const snap=await getDoc(ref);
+   if(snap.exists()){
+    const data=snap.data();
+    $("name").value=data.name||"";
+    $("username").value=data.username||"";
+    $("bio").value=data.bio||"";
+   }
+   loadFeed();
+  }catch(e){
+   message("profileMessage",e.message);
   }
-  loadFeed();
- }catch(e){
-  $("profileMessage").textContent="Database error: "+e.message;
  }
 });
 
 $("saveProfile").onclick=async()=>{
- const user=auth.currentUser;
- if(!user)return;
-
+ if(!currentUser)return;
  try{
-  await setDoc(doc(db,"Users",user.uid),{
-   Name:$("name").value.trim(),
+  await setDoc(doc(db,"Users",currentUser.uid),{
+   name:$("name").value.trim(),
    username:$("username").value.trim(),
-   Bio:$("bio").value.trim(),
-   email:user.email,
-   createdAt:serverTimestamp()
+   bio:$("bio").value.trim(),
+   email:currentUser.email
   },{merge:true});
+  message("profileMessage","प्रोफाइल सेव हो गई! 💜");
+ }catch(e){message("profileMessage",e.message);}
+};
 
-  $("profileMessage").textContent="Profile saved!";
- }catch(e){$("profileMessage").textContent=e.message}
+$("logout").onclick=async()=>{
+ try{await signOut(auth);}
+ catch(e){message("profileMessage",e.message);}
 };
 
 $("publish").onclick=async()=>{
- const user=auth.currentUser;
- const content=$("postText").value.trim();
-
- if(!user||!content)return;
-
+ if(!currentUser)return;
+ const text=$("postText").value.trim();
+ if(!text){
+  message("postMessage","पहले कुछ लिखें।");
+  return;
+ }
  try{
   await addDoc(collection(db,"Posts"),{
-   text:content,
-   uid:user.uid,
+   uid:currentUser.uid,
+   name:$("name").value.trim()||"Novagram User",
+   username:$("username").value.trim()||"user",
+   text:text,
+   likes:[],
+   comments:[],
    createdAt:serverTimestamp()
   });
-
   $("postText").value="";
-  $("postMessage").textContent="Post published!";
- }catch(e){$("postMessage").textContent=e.message}
+  message("postMessage","पोस्ट प्रकाशित हो गई! 💜");
+ }catch(e){message("postMessage",e.message);}
 };
 
-let unsubscribe=null;
-let postListeners=[];
-
-function clearPostListeners(){
- postListeners.forEach(stop=>stop());
- postListeners=[];
-}
-
 function loadFeed(){
- if(unsubscribe)unsubscribe();
- clearPostListeners();
-
- const q=query(collection(db,"Posts"),orderBy("createdAt","desc"));
-
- unsubscribe=onSnapshot(q,snapshot=>{
-  clearPostListeners();
-  $("feed").innerHTML="";
-
-  snapshot.forEach(item=>{
-   const d=item.data();
-   const postId=item.id;
-   const user=auth.currentUser;
-
-   const post=document.createElement("div");
-   post.className="post";
-
-   const heading=document.createElement("p");
-   heading.textContent="💜 Novagram User";
-   post.appendChild(heading);
-
-   const content=document.createElement("p");
-   content.className="post-text";
-   content.textContent=d.text||"";
-   post.appendChild(content);
-
-   // Like button
-   const likeButton=document.createElement("button");
-   likeButton.className="like-button";
-   likeButton.textContent="🤍 Like";
-
-   const likeCount=document.createElement("p");
-   likeCount.className="small";
-   likeCount.textContent="Likes: 0";
-
-   post.appendChild(likeButton);
-   post.appendChild(likeCount);
-
-   // Comments section
-   const commentTitle=document.createElement("h3");
-   commentTitle.textContent="💬 Comments";
-   post.appendChild(commentTitle);
-
-   const commentsBox=document.createElement("div");
-   post.appendChild(commentsBox);
-
-   const commentInput=document.createElement("textarea");
-   commentInput.className="comment-input";
-   commentInput.placeholder="Write a comment...";
-
-   const commentButton=document.createElement("button");
-   commentButton.textContent="Send Comment";
-
-   post.appendChild(commentInput);
-   post.appendChild(commentButton);
-
-   $("feed").appendChild(post);
-
-   const likesRef=collection(db,"Posts",postId,"Likes");
-
-   // Live like count and current user's like
-   const stopLikes=onSnapshot(likesRef,likeSnap=>{
-    likeCount.textContent="Likes: "+likeSnap.size;
-
-    const liked=likeSnap.docs.some(x=>x.id===user.uid);
-    likeButton.textContent=liked?"💜 Liked":"🤍 Like";
-   },error=>{
-    likeCount.textContent="Likes unavailable";
-   });
-
-   postListeners.push(stopLikes);
-
-   likeButton.onclick=async()=>{
-    try{
-     const myLike=doc(db,"Posts",postId,"Likes",user.uid);
-     const existing=await getDoc(myLike);
-
-     if(existing.exists()){
-      await deleteDoc(myLike);
-     }else{
-      await setDoc(myLike,{
-       uid:user.uid,
-       createdAt:serverTimestamp()
-      });
-     }
-    }catch(e){
-     $("postMessage").textContent="Like error: "+e.message;
-    }
-   };
-
-   // Live comments
-   const commentsQuery=query(
-    collection(db,"Posts",postId,"Comments"),
-    orderBy("createdAt","asc")
-   );
-
-   const stopComments=onSnapshot(commentsQuery,commentSnap=>{
-    commentsBox.innerHTML="";
-
-    commentSnap.forEach(commentDoc=>{
-     const c=commentDoc.data();
-     const line=document.createElement("div");
-     line.className="comment";
-     line.textContent="💬 "+(c.text||"");
-     commentsBox.appendChild(line);
-    });
-   },error=>{
-    commentsBox.textContent="Comments unavailable";
-   });
-
-   postListeners.push(stopComments);
-
-   commentButton.onclick=async()=>{
-    const text=commentInput.value.trim();
-    if(!text)return;
-
-    try{
-     await addDoc(
-      collection(db,"Posts",postId,"Comments"),
-      {
-       text:text,
-       uid:user.uid,
-       createdAt:serverTimestamp()
-      }
-     );
-
-     commentInput.value="";
-    }catch(e){
-     $("postMessage").textContent="Comment error: "+e.message;
-    }
-   };
+ const feedRef=collection(db,"Posts");
+ stopFeed=onSnapshot(feedRef,snapshot=>{
+  const posts=snapshot.docs.map(d=>({id:d.id,...d.data()}));
+  posts.sort((a,b)=>{
+   const at=a.createdAt?.toMillis?.()||0;
+   const bt=b.createdAt?.toMillis?.()||0;
+   return bt-at;
   });
-
+  renderFeed(posts);
  },error=>{
-  $("postMessage").textContent=error.message;
+  $("feed").textContent="Feed error: "+error.message;
  });
 }
 
-$("logout").onclick=()=>signOut(auth);
-Novagram Photo & Video Picker
-const mediaInput = document.createElement("input");
-mediaInput.type = "file";
-mediaInput.accept = "image/*,video/*";
-mediaInput.id = "mediaInput";
+function renderFeed(posts){
+ const feed=$("feed");
+ feed.innerHTML="";
 
-const mediaPreview = document.createElement("div");
-mediaPreview.id = "mediaPreview";
+ if(posts.length===0){
+  feed.textContent="अभी कोई पोस्ट नहीं है। पहली पोस्ट आप करें! 💜";
+  return;
+ }
 
-const postArea = document.getElementById("postText");
+ posts.forEach(post=>{
+  const card=document.createElement("div");
+  card.className="post";
 
-postArea.parentNode.insertBefore(mediaInput, postArea.nextSibling);
-postArea.parentNode.insertBefore(mediaPreview, mediaInput.nextSibling);
+  const heading=document.createElement("b");
+  heading.textContent="💜 "+(post.name||post.username||"Novagram User");
 
-mediaInput.addEventListener("change", () => {
-  mediaPreview.innerHTML = "";
+  const content=document.createElement("p");
+  content.style.whiteSpace="pre-wrap";
+  content.textContent=post.text||post.content||post.postText||"";
 
-  const file = mediaInput.files[0];
-  if (!file) return;
+  const info=document.createElement("small");
+  info.textContent=post.createdAt?.toDate
+   ?post.createdAt.toDate().toLocaleString("hi-IN")
+   :"Novagram";
 
-  const url = URL.createObjectURL(file);
-  const preview = file.type.startsWith("video/")
-    ? document.createElement("video")
-    : document.createElement("img");
+  const actions=document.createElement("div");
+  actions.className="actions";
 
-  preview.src = url;
-  preview.style.width = "100%";
-  preview.style.maxHeight = "300px";
-  preview.style.objectFit = "contain";
+  const likes=Array.isArray(post.likes)?post.likes:[];
+  const liked=likes.includes(currentUser.uid);
 
-  if (preview.tagName === "VIDEO") {
-    preview.controls = true;
-  }
+  const likeBtn=document.createElement("button");
+  likeBtn.textContent=(liked?"❤️":"🤍")+" Like ("+likes.length+")";
+  likeBtn.onclick=async()=>{
+   try{
+    const ref=doc(db,"Posts",post.id);
+    await updateDoc(ref,{
+     likes:liked
+      ?arrayRemove(currentUser.uid)
+      :arrayUnion(currentUser.uid)
+    });
+   }catch(e){alert("Like error: "+e.message);}
+  };
 
-  mediaPreview.appendChild(preview);
-});</script>
+  const commentBtn=document.createElement("button");
+  commentBtn.textContent="💬 Comments";
+  actions.append(likeBtn,commentBtn);
+
+  const commentsBox=document.createElement("div");
+  const comments=Array.isArray(post.comments)?post.comments:[];
+  comments.forEach(c=>{
+   const item=document.createElement("div");
+   item.className="comment";
+   item.textContent=(c.name||"User")+": "+(c.text||"");
+   commentsBox.appendChild(item);
+  });
+
+  const commentInput=document.createElement("input");
+  commentInput.placeholder="अपनी टिप्पणी लिखें...";
+
+  const sendBtn=document.createElement("button");
+  sendBtn.textContent="टिप्पणी भेजें";
+  sendBtn.onclick=async()=>{
+   const text=commentInput.value.trim();
+   if(!text)return;
+   try{
+    await updateDoc(doc(db,"Posts",post.id),{
+     comments:arrayUnion({
+      uid:currentUser.uid,
+      name:$("name").value.trim()||"Novagram User",
+      text:text
+     })
+    });
+   }catch(e){alert("Comment error: "+e.message);}
+  };
+
+  commentBtn.onclick=()=>{
+   commentsBox.classList.toggle("hidden");
+   commentInput.classList.toggle("hidden");
+   sendBtn.classList.toggle("hidden");
+  };
+
+  commentInput.classList.add("hidden");
+  sendBtn.classList.add("hidden");
+
+  card.append(heading,info,content,actions,commentsBox,commentInput,sendBtn);
+  feed.appendChild(card);
+ });
+}
+</script>
 </body>
 </html>
+
 
