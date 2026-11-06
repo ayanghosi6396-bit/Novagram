@@ -4,288 +4,213 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Novagram</title>
+<title>Novagram 💜</title>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:linear-gradient(135deg,#260044,#7025b9,#a66aff);color:white;font-family:Arial,sans-serif;min-height:100vh;padding:15px}
-.container{max-width:500px;margin:20px auto;background:#321052;padding:20px;border-radius:20px;box-shadow:0 8px 30px #16002588}
-h1,h2{text-align:center}
-.small{text-align:center;color:#e5caff;font-size:14px}
-input,textarea{width:100%;padding:13px;margin:7px 0;border:0;border-radius:9px;font-size:15px}
-textarea{min-height:75px;resize:vertical}
-button{width:100%;padding:13px;margin:7px 0;border:0;border-radius:9px;background:#bd83ff;color:#260044;font-size:16px;font-weight:bold}
-button:disabled{opacity:.5}
-.post{background:#4b2170;padding:15px;margin:12px 0;border-radius:12px;overflow-wrap:anywhere}
-.post small{color:#e5caff}
-.actions{display:flex;gap:8px}
-.actions button{flex:1}
-.comment{background:#321052;padding:9px;margin:7px 0;border-radius:8px}
+body{margin:0;background:#f5f0ff;font-family:Arial;color:#24143b}
+header{background:linear-gradient(120deg,#4c1d95,#9333ea);color:white;padding:20px;text-align:center}
+main{max-width:650px;margin:20px auto;padding:12px}
+.card{background:white;padding:18px;margin-bottom:15px;border-radius:15px;box-shadow:0 3px 12px #0001}
+h1,h2{margin-top:0}
+input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:9px;font-size:15px}
+textarea{min-height:75px}
+button{padding:11px 16px;background:#7025c9;color:white;border:0;border-radius:9px;font-weight:bold;margin:4px;cursor:pointer}
+.secondary{background:#eee5ff;color:#54208c}
 .hidden{display:none}
-hr{border:0;border-top:1px solid #8050a0;margin:18px 0}
+.post{border-bottom:1px solid #eee;padding:12px 0}
+.post img{width:100%;max-height:400px;object-fit:contain}
+.status{font-size:13px;color:#7025c9}
 </style>
 </head>
 <body>
-<div class="container">
+<header>
 <h1>💜 Novagram</h1>
-<p class="small">Connect • Share • Discover</p>
-
-<div id="auth">
-<h2>स्वागत है!</h2>
-<input id="email" type="email" placeholder="Email Address">
+Connect • Share • Discover
+</header>
+<main>
+<section id="auth" class="card">
+<h2>Welcome to Novagram</h2>
+<input id="email" type="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
-<button id="signup">नया अकाउंट बनाएँ</button>
-<button id="login">लॉगिन करें</button>
-<p id="message" class="small"></p>
-</div>
+<button id="signup">Sign Up</button>
+<button id="login" class="secondary">Login</button>
+<p id="authMsg" class="status"></p>
+</section>
 
-<div id="app" class="hidden">
-<h2>आपकी प्रोफाइल</h2>
-<input id="name" placeholder="आपका नाम">
+<div id="appArea" class="hidden">
+<section class="card">
+<h2>Your Profile</h2>
+<input id="name" placeholder="Your Name">
 <input id="username" placeholder="Username">
-<textarea id="bio" placeholder="अपने बारे में लिखें"></textarea>
-<button id="saveProfile">प्रोफाइल सेव करें</button>
-<button id="logout">लॉगआउट</button>
-<p id="profileMessage" class="small"></p>
+<textarea id="bio" placeholder="Write your Bio"></textarea>
+<button id="saveProfile">Save Profile</button>
+<button id="logout" class="secondary">Logout</button>
+<p id="profileMsg" class="status"></p>
+</section>
 
-<hr>
-<h2>पोस्ट बनाएँ</h2>
-<textarea id="postText" placeholder="आपके मन में क्या है?"></textarea>
-<button id="publish">पोस्ट प्रकाशित करें</button>
-<p id="postMessage" class="small"></p>
+<section class="card">
+<h2>Create Post</h2>
+<textarea id="postText" placeholder="What's on your mind?"></textarea>
+<input id="photo" type="file" accept="image/*">
+<button id="publish">Publish Post</button>
+<p id="postMsg" class="status"></p>
+</section>
 
-<hr>
+<section class="card">
 <h2>💜 Novagram Feed</h2>
-<div id="feed">पोस्ट लोड हो रही हैं...</div>
+<div id="feed">Loading posts...</div>
+</section>
 </div>
-</div>
+</main>
 
 <script type="module">
-import {initializeApp} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-app.js";
-
-import {
- getAuth,createUserWithEmailAndPassword,
- signInWithEmailAndPassword,onAuthStateChanged,signOut
-} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-auth.js";
-
-import {
- getFirestore,doc,setDoc,getDoc,collection,
- addDoc,onSnapshot,updateDoc,arrayUnion,arrayRemove,
- serverTimestamp
-} from "https://www.gstatic.com/firebasejs/13.2.0/firebase-firestore.js";
+import {initializeApp} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,onAuthStateChanged,signOut} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {getFirestore,doc,setDoc,getDoc,addDoc,collection,query,orderBy,onSnapshot,serverTimestamp,deleteDoc,getDocs} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import {getStorage,ref,uploadBytes,getDownloadURL} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-storage.js";
 
 const firebaseConfig={
- apiKey:"AIzaSyCC5J21io0PaOrOhVeoR9L92ostWLKI4GE",
- authDomain:"novagram-68bd9.firebaseapp.com",
- projectId:"novagram-68bd9",
- storageBucket:"novagram-68bd9.firebasestorage.app",
- messagingSenderId:"712062216370",
- appId:"1:712062216370:web:c8325500a538873af8c1ab",
- measurementId:"G-WV2MCHK3HS"
+apiKey:"AIzaSyCC5J21io0PaOrOhVeoR9L92ostWLKI4GE",
+authDomain:"novagram-68bd9.firebaseapp.com",
+projectId:"novagram-68bd9",
+storageBucket:"novagram-68bd9.firebasestorage.app",
+messagingSenderId:"712062216370",
+appId:"1:712062216370:web:c8325500a538873af8c1ab"
 };
 
 const app=initializeApp(firebaseConfig);
 const auth=getAuth(app);
 const db=getFirestore(app);
-
+const storage=getStorage(app);
 const $=id=>document.getElementById(id);
-let currentUser=null;
+let user=null,profile={name:"Novagram User",username:"user",bio:""};
 let stopFeed=null;
 
-function message(id,text){
- $(id).textContent=text;
-}
+function msg(id,text){$(id).textContent=text}
+function safe(s){return String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
+function error(e){return e.code==="auth/email-already-in-use"?"Email already registered":e.code==="auth/invalid-credential"?"Email or password incorrect":e.message}
 
 $("signup").onclick=async()=>{
- try{
-  const email=$("email").value.trim();
-  const password=$("password").value;
-  if(!email||password.length<6){
-   message("message","ईमेल और कम से कम 6 अक्षर का पासवर्ड डालें।");
-   return;
-  }
-  await createUserWithEmailAndPassword(auth,email,password);
-  message("message","अकाउंट बन गया!");
- }catch(e){message("message",e.message);}
+try{
+await createUserWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+msg("authMsg","Account created!");
+}catch(e){msg("authMsg",error(e))}
 };
 
 $("login").onclick=async()=>{
- try{
-  await signInWithEmailAndPassword(
-   auth,$("email").value.trim(),$("password").value
-  );
- }catch(e){message("message",e.message);}
+try{
+await signInWithEmailAndPassword(auth,$("email").value.trim(),$("password").value);
+msg("authMsg","Login successful!");
+}catch(e){msg("authMsg",error(e))}
 };
 
-onAuthStateChanged(auth,async user=>{
- currentUser=user;
- $("auth").classList.toggle("hidden",!!user);
- $("app").classList.toggle("hidden",!user);
+$("logout").onclick=()=>signOut(auth);
 
- if(stopFeed){stopFeed();stopFeed=null;}
-
- if(user){
-  try{
-   const ref=doc(db,"Users",user.uid);
-   const snap=await getDoc(ref);
-   if(snap.exists()){
-    const data=snap.data();
-    $("name").value=data.name||"";
-    $("username").value=data.username||"";
-    $("bio").value=data.bio||"";
-   }
-   loadFeed();
-  }catch(e){
-   message("profileMessage",e.message);
-  }
- }
+onAuthStateChanged(auth,async u=>{
+user=u;
+$("auth").classList.toggle("hidden",!!u);
+$("appArea").classList.toggle("hidden",!u);
+if(!u){if(stopFeed)stopFeed();return}
+await loadProfile();
+startFeed();
 });
 
-$("saveProfile").onclick=async()=>{
- if(!currentUser)return;
- try{
-  await setDoc(doc(db,"Users",currentUser.uid),{
-   name:$("name").value.trim(),
-   username:$("username").value.trim(),
-   bio:$("bio").value.trim(),
-   email:currentUser.email
-  },{merge:true});
-  message("profileMessage","प्रोफाइल सेव हो गई! 💜");
- }catch(e){message("profileMessage",e.message);}
-};
+async function loadProfile(){
+let s=await getDoc(doc(db,"Users",user.uid));
+if(s.exists())profile={...profile,...s.data()};
+else await setDoc(doc(db,"Users",user.uid),profile);
+$("name").value=profile.name||"";
+$("username").value=profile.username||"";
+$("bio").value=profile.bio||"";
+}
 
-$("logout").onclick=async()=>{
- try{await signOut(auth);}
- catch(e){message("profileMessage",e.message);}
+$("saveProfile").onclick=async()=>{
+try{
+profile={name:$("name").value.trim(),username:$("username").value.trim(),bio:$("bio").value.trim()};
+await setDoc(doc(db,"Users",user.uid),profile,{merge:true});
+msg("profileMsg","Profile saved 💜");
+}catch(e){msg("profileMsg",error(e))}
 };
 
 $("publish").onclick=async()=>{
- if(!currentUser)return;
- const text=$("postText").value.trim();
- if(!text){
-  message("postMessage","पहले कुछ लिखें।");
-  return;
- }
- try{
-  await addDoc(collection(db,"Posts"),{
-   uid:currentUser.uid,
-   name:$("name").value.trim()||"Novagram User",
-   username:$("username").value.trim()||"user",
-   text:text,
-   likes:[],
-   comments:[],
-   createdAt:serverTimestamp()
-  });
-  $("postText").value="";
-  message("postMessage","पोस्ट प्रकाशित हो गई! 💜");
- }catch(e){message("postMessage",e.message);}
+let text=$("postText").value.trim(),file=$("photo").files[0];
+if(!text&&!file){msg("postMsg","Write something or select a photo.");return}
+if(file&&(!file.type.startsWith("image/")||file.size>5*1024*1024)){msg("postMsg","Choose an image under 5 MB.");return}
+try{
+let imageUrl="";
+if(file){
+let r=ref(storage,"posts/"+user.uid+"/"+Date.now()+"_"+file.name);
+await uploadBytes(r,file);
+imageUrl=await getDownloadURL(r);
+}
+await addDoc(collection(db,"Posts"),{
+uid:user.uid,name:profile.name||"Novagram User",
+username:profile.username||"user",text,imageUrl,
+createdAt:serverTimestamp()
+});
+$("postText").value="";
+$("photo").value="";
+msg("postMsg","Post published! 💜");
+}catch(e){msg("postMsg",error(e))}
 };
 
-function loadFeed(){
- const feedRef=collection(db,"Posts");
- stopFeed=onSnapshot(feedRef,snapshot=>{
-  const posts=snapshot.docs.map(d=>({id:d.id,...d.data()}));
-  posts.sort((a,b)=>{
-   const at=a.createdAt?.toMillis?.()||0;
-   const bt=b.createdAt?.toMillis?.()||0;
-   return bt-at;
-  });
-  renderFeed(posts);
- },error=>{
-  $("feed").textContent="Feed error: "+error.message;
- });
+function startFeed(){
+if(stopFeed)stopFeed();
+stopFeed=onSnapshot(query(collection(db,"Posts"),orderBy("createdAt","desc")),s=>{
+$("feed").innerHTML="";
+if(s.empty){$("feed").textContent="No posts yet. Welcome to Novagram!";return}
+s.forEach(p=>{
+let d=p.data(),id=p.id,el=document.createElement("div");
+el.className="post";
+el.innerHTML=`<b>💜 ${safe(d.name)}</b><p>@${safe(d.username)}</p><p>${safe(d.text)}</p>${d.imageUrl?`<img src="${safe(d.imageUrl)}">`:""}<button class="secondary like">🤍 Like</button><span class="likes">Loading...</span><button class="secondary toggle">💬 Comments</button><div class="comments hidden"><div class="commentList"></div><input class="commentText" placeholder="Write a comment..."><button class="send">Send</button></div>`;
+$("feed").appendChild(el);
+const likeRef=doc(db,"Posts",id,"Likes",user.uid);
+const likes=collection(db,"Posts",id,"Likes");
+async function refresh(){
+try{
+let [mine,all]=await Promise.all([getDoc(likeRef),getDocs(likes)]);
+el.querySelector(".like").textContent=mine.exists()?"💜 Liked":"🤍 Like";
+el.querySelector(".likes").textContent=" "+all.size+" Likes";
+}catch(e){el.querySelector(".likes").textContent="Likes unavailable"}
 }
+el.querySelector(".like").onclick=async()=>{
+try{
+let mine=await getDoc(likeRef);
+if(mine.exists())await deleteDoc(likeRef);
+else await setDoc(likeRef,{uid:user.uid});
+await refresh();
+}catch(e){alert(error(e))}
+};
+refresh();
 
-function renderFeed(posts){
- const feed=$("feed");
- feed.innerHTML="";
-
- if(posts.length===0){
-  feed.textContent="अभी कोई पोस्ट नहीं है। पहली पोस्ट आप करें! 💜";
-  return;
- }
-
- posts.forEach(post=>{
-  const card=document.createElement("div");
-  card.className="post";
-
-  const heading=document.createElement("b");
-  heading.textContent="💜 "+(post.name||post.username||"Novagram User");
-
-  const content=document.createElement("p");
-  content.style.whiteSpace="pre-wrap";
-  content.textContent=post.text||post.content||post.postText||"";
-
-  const info=document.createElement("small");
-  info.textContent=post.createdAt?.toDate
-   ?post.createdAt.toDate().toLocaleString("hi-IN")
-   :"Novagram";
-
-  const actions=document.createElement("div");
-  actions.className="actions";
-
-  const likes=Array.isArray(post.likes)?post.likes:[];
-  const liked=likes.includes(currentUser.uid);
-
-  const likeBtn=document.createElement("button");
-  likeBtn.textContent=(liked?"❤️":"🤍")+" Like ("+likes.length+")";
-  likeBtn.onclick=async()=>{
-   try{
-    const ref=doc(db,"Posts",post.id);
-    await updateDoc(ref,{
-     likes:liked
-      ?arrayRemove(currentUser.uid)
-      :arrayUnion(currentUser.uid)
-    });
-   }catch(e){alert("Like error: "+e.message);}
-  };
-
-  const commentBtn=document.createElement("button");
-  commentBtn.textContent="💬 Comments";
-  actions.append(likeBtn,commentBtn);
-
-  const commentsBox=document.createElement("div");
-  const comments=Array.isArray(post.comments)?post.comments:[];
-  comments.forEach(c=>{
-   const item=document.createElement("div");
-   item.className="comment";
-   item.textContent=(c.name||"User")+": "+(c.text||"");
-   commentsBox.appendChild(item);
-  });
-
-  const commentInput=document.createElement("input");
-  commentInput.placeholder="अपनी टिप्पणी लिखें...";
-
-  const sendBtn=document.createElement("button");
-  sendBtn.textContent="टिप्पणी भेजें";
-  sendBtn.onclick=async()=>{
-   const text=commentInput.value.trim();
-   if(!text)return;
-   try{
-    await updateDoc(doc(db,"Posts",post.id),{
-     comments:arrayUnion({
-      uid:currentUser.uid,
-      name:$("name").value.trim()||"Novagram User",
-      text:text
-     })
-    });
-   }catch(e){alert("Comment error: "+e.message);}
-  };
-
-  commentBtn.onclick=()=>{
-   commentsBox.classList.toggle("hidden");
-   commentInput.classList.toggle("hidden");
-   sendBtn.classList.toggle("hidden");
-  };
-
-  commentInput.classList.add("hidden");
-  sendBtn.classList.add("hidden");
-
-  card.append(heading,info,content,actions,commentsBox,commentInput,sendBtn);
-  feed.appendChild(card);
- });
+const box=el.querySelector(".comments"),list=el.querySelector(".commentList");
+async function loadComments(){
+try{
+let cs=await getDocs(query(collection(db,"Posts",id,"Comments"),orderBy("createdAt","asc")));
+list.innerHTML="";
+cs.forEach(c=>{
+let x=document.createElement("p");
+x.innerHTML="<b>"+safe(c.data().name)+"</b>: "+safe(c.data().text);
+list.appendChild(x);
+});
+}catch(e){list.textContent="Comments unavailable"}
+}
+el.querySelector(".toggle").onclick=()=>{box.classList.toggle("hidden");loadComments()};
+el.querySelector(".send").onclick=async()=>{
+let input=el.querySelector(".commentText"),t=input.value.trim();
+if(!t)return;
+try{
+await addDoc(collection(db,"Posts",id,"Comments"),{uid:user.uid,name:profile.name||"User",text:t,createdAt:serverTimestamp()});
+input.value="";
+loadComments();
+}catch(e){alert(error(e))}
+};
+});
+},e=>{$("feed").textContent=error(e)});
 }
 </script>
 </body>
 </html>
+
 
 
