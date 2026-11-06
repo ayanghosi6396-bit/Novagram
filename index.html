@@ -334,7 +334,42 @@ function loadFeed(){
 }
 
 $("logout").onclick=()=>signOut(auth);
-</script>
+Novagram Photo & Video Picker
+const mediaInput = document.createElement("input");
+mediaInput.type = "file";
+mediaInput.accept = "image/*,video/*";
+mediaInput.id = "mediaInput";
+
+const mediaPreview = document.createElement("div");
+mediaPreview.id = "mediaPreview";
+
+const postArea = document.getElementById("postText");
+
+postArea.parentNode.insertBefore(mediaInput, postArea.nextSibling);
+postArea.parentNode.insertBefore(mediaPreview, mediaInput.nextSibling);
+
+mediaInput.addEventListener("change", () => {
+  mediaPreview.innerHTML = "";
+
+  const file = mediaInput.files[0];
+  if (!file) return;
+
+  const url = URL.createObjectURL(file);
+  const preview = file.type.startsWith("video/")
+    ? document.createElement("video")
+    : document.createElement("img");
+
+  preview.src = url;
+  preview.style.width = "100%";
+  preview.style.maxHeight = "300px";
+  preview.style.objectFit = "contain";
+
+  if (preview.tagName === "VIDEO") {
+    preview.controls = true;
+  }
+
+  mediaPreview.appendChild(preview);
+});</script>
 </body>
 </html>
 
