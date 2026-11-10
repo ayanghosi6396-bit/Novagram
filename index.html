@@ -39,10 +39,20 @@ nav button{background:transparent;color:#7026bb;font-size:19px;padding:8px}
 
 <section class="card" id="auth">
 <h3>Welcome to Novagram 💜</h3>
-<input id="email" type="email" placeholder="Email">
-<input id="password" type="password" placeholder="Password">
+<input id="email" type="email" placeholder="अपना ईमेल लिखें">
+<input id="password" type="password" placeholder="पासवर्ड">
+
 <button class="full" onclick="signup()">Create Account</button>
 <button class="full secondary" onclick="login()">Login</button>
+<button class="full secondary" onclick="forgotPassword()">🔑 पासवर्ड भूल गए?</button>
+
+<div id="resetBox" class="hidden">
+<hr>
+<h3>नया पासवर्ड बनाएँ</h3>
+<input id="newPassword" type="password" placeholder="नया पासवर्ड (कम से कम 6 अक्षर)">
+<button class="full" onclick="updatePassword()">पासवर्ड बदलें</button>
+</div>
+
 <p id="authStatus"></p>
 </section>
 
@@ -104,18 +114,86 @@ function message(id,text){el(id).textContent=text;}
 async function signup(){
  const email=el('email').value.trim();
  const password=el('password').value;
- if(!email||password.length<6){message('authStatus','सही Email और कम से कम 6 अक्षर का Password डालो।');return;}
+
+ if(!email||password.length<6){
+  message('authStatus','सही Email और कम से कम 6 अक्षर का Password डालो।');
+  return;
+ }
+
  const {data,error}=await db.auth.signUp({email,password});
- if(error){message('authStatus',error.message);return;}
+
+ if(error){
+  message('authStatus',error.message);
+  return;
+ }
+
  message('authStatus','Account बन गया! Email verification माँगी जाए तो Email verify करो।');
+
  if(data.session)await startApp();
 }
 
 async function login(){
  const email=el('email').value.trim();
  const password=el('password').value;
+
+ if(!email||!password){
+  message('authStatus','Email और Password डालो।');
+  return;
+ }
+
  const {error}=await db.auth.signInWithPassword({email,password});
- if(error){message('authStatus',error.message);return;}
+
+ if(error){
+  message('authStatus',error.message);
+  return;
+ }
+
+ await startApp();
+}
+
+/* पासवर्ड भूल गए */
+async function forgotPassword(){
+ const email=el('email').value.trim();
+
+ if(!email){
+  message('authStatus','पहले अपना रजिस्टर्ड Email लिखो।');
+  return;
+ }
+
+ message('authStatus','Reset link भेजा जा रहा है...');
+
+ const {error}=await db.auth.resetPasswordForEmail(email,{
+  redirectTo:location.origin
+ });
+
+ if(error){
+  message('authStatus','समस्या: '+error.message);
+ }else{
+  message('authStatus','पासवर्ड बदलने का लिंक ईमेल पर भेज दिया गया है। Inbox और Spam देखें।');
+ }
+}
+
+/* नया पासवर्ड सेव करना */
+async function updatePassword(){
+ const newPassword=el('newPassword').value;
+
+ if(newPassword.length<6){
+  message('authStatus','नया पासवर्ड कम से कम 6 अक्षर का होना चाहिए।');
+  return;
+ }
+
+ const {error}=await db.auth.updateUser({
+  password:newPassword
+ });
+
+ if(error){
+  message('authStatus','समस्या: '+error.message);
+  return;
+ }
+
+ el('resetBox').classList.add('hidden');
+ message('authStatus','पासवर्ड सफलतापूर्वक बदल गया! 💜');
+
  await startApp();
 }
 
@@ -126,12 +204,17 @@ async function logout(){
 
 async function startApp(){
  const {data,error}=await db.auth.getUser();
+
  if(error||!data.user)return;
+
  currentUser=data.user;
+
  el('auth').classList.add('hidden');
  el('app').classList.remove('hidden');
  el('nav').classList.remove('hidden');
+
  el('welcome').textContent='💜 '+(currentUser.email||'Novagram User');
+
  await loadProfile();
  await loadFeed();
 }
@@ -139,15 +222,21 @@ async function startApp(){
 function showTab(tab){
  el('home').classList.toggle('hidden',tab!=='home');
  el('profile').classList.toggle('hidden',tab!=='profile');
+
  if(tab==='home')loadFeed();
 }
 
 async function loadProfile(){
- const {data}=await db.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+ const {data}=await db.from('profiles')
+ .select('*')
+ .eq('id',currentUser.id)
+ .maybeSingle();
+
  if(data){
   el('fullName').value=data.full_name||'';
   el('username').value=data.username||'';
   el('bio').value=data.bio||'';
+
   if(data.avatar_url)el('avatar').src=data.avatar_url;
  }
 }
@@ -159,6 +248,7 @@ async function saveProfile(){
   username:el('username').value.trim()||null,
   bio:el('bio').value.trim()
  });
+
  message('profileStatus',error?error.message:'Profile saved 💜');
 }
 
@@ -167,19 +257,37 @@ async function publish(){
  const caption=el('caption').value.trim();
  const status=el('uploadStatus');
 
- if(!file&&!caption){status.textContent='पहले Text या Photo/Video चुनो।';return;}
- if(file&&file.size>50*1024*1024){status.textContent='फाइल 50 MB से बड़ी है।';return;}
+ if(!file&&!caption){
+  status.textContent='पहले Text या Photo/Video चुनो।';
+  return;
+ }
+
+ if(file&&file.size>50*1024*1024){
+  status.textContent='फाइल 50 MB से बड़ी है।';
+  return;
+ }
 
  let url=null,type='text';
+
  if(file){
   if(!file.type.startsWith('image/')&&!file.type.startsWith('video/')){
-   status.textContent='सिर्फ फोटो या वीडियो चुनो।';return;
+   status.textContent='सिर्फ फोटो या वीडियो चुनो।';
+   return;
   }
+
   type=file.type.startsWith('video/')?'reel':'image';
+
   const path=currentUser.id+'/'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+
   status.textContent='Uploading...';
+
   const {error}=await db.storage.from('Novagram_media').upload(path,file);
-  if(error){status.textContent=error.message;return;}
+
+  if(error){
+   status.textContent=error.message;
+   return;
+  }
+
   url=db.storage.from('Novagram_media').getPublicUrl(path).data.publicUrl;
  }
 
@@ -189,21 +297,38 @@ async function publish(){
   media_url:url,
   media_type:type
  });
- if(error){status.textContent=error.message;return;}
+
+ if(error){
+  status.textContent=error.message;
+  return;
+ }
 
  el('caption').value='';
  el('media').value='';
  status.textContent='Post Published 💜';
+
  await loadFeed();
 }
 
 async function loadFeed(){
  const feed=el('feed');
  feed.textContent='Loading...';
- const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false});
- if(error){feed.textContent=error.message;return;}
+
+ const {data:posts,error}=await db.from('posts')
+ .select('*')
+ .order('created_at',{ascending:false});
+
+ if(error){
+  feed.textContent=error.message;
+  return;
+ }
+
  feed.innerHTML='';
- if(!posts.length){feed.textContent='अभी कोई पोस्ट नहीं है। पहली पोस्ट तुम करो!';return;}
+
+ if(!posts.length){
+  feed.textContent='अभी कोई पोस्ट नहीं है। पहली पोस्ट तुम करो!';
+  return;
+ }
 
  for(const p of posts){
   const card=document.createElement('div');
@@ -220,7 +345,9 @@ async function loadFeed(){
   if(p.media_url){
    const media=document.createElement(p.media_type==='image'?'img':'video');
    media.src=p.media_url;
+
    if(media.tagName==='VIDEO')media.controls=true;
+
    card.appendChild(media);
   }
 
@@ -251,56 +378,109 @@ async function loadFeed(){
   comments.className='small';
   comments.textContent='Comments loading...';
   card.appendChild(comments);
-  loadComments(p.id,comments);
 
+  loadComments(p.id,comments);
   feed.appendChild(card);
  }
 }
 
 async function likePost(id){
- const {data:existing,error:checkError}=await db.from('likes').select('id').eq('post_id',id).eq('user_id',currentUser.id).maybeSingle();
- if(checkError){alert(checkError.message);return;}
+ const {data:existing,error:checkError}=await db.from('likes')
+ .select('id')
+ .eq('post_id',id)
+ .eq('user_id',currentUser.id)
+ .maybeSingle();
+
+ if(checkError){
+  alert(checkError.message);
+  return;
+ }
+
  let result;
+
  if(existing){
   result=await db.from('likes').delete().eq('id',existing.id);
  }else{
-  result=await db.from('likes').insert({post_id:id,user_id:currentUser.id});
+  result=await db.from('likes').insert({
+   post_id:id,
+   user_id:currentUser.id
+  });
  }
+
  if(result.error)alert(result.error.message);
  else loadFeed();
 }
 
 async function commentPost(id){
  const value=prompt('अपना Comment लिखो');
+
  if(!value||!value.trim())return;
+
  const {error}=await db.from('comments').insert({
-  post_id:id,user_id:currentUser.id,comment:value.trim()
+  post_id:id,
+  user_id:currentUser.id,
+  comment:value.trim()
  });
+
  if(error)alert(error.message);
  else loadFeed();
 }
 
 async function loadComments(id,container){
- const {data,error}=await db.from('comments').select('comment').eq('post_id',id).order('created_at');
- if(error){container.textContent='Comments unavailable';return;}
- container.textContent=data.length?data.map(x=>'💬 '+x.comment).join(' | '):'No comments yet';
+ const {data,error}=await db.from('comments')
+ .select('comment')
+ .eq('post_id',id)
+ .order('created_at');
+
+ if(error){
+  container.textContent='Comments unavailable';
+  return;
+ }
+
+ container.textContent=data.length?
+ data.map(x=>'💬 '+x.comment).join(' | '):
+ 'No comments yet';
 }
 
 async function sharePost(post){
  const url=post.media_url||location.href;
+
  if(navigator.share){
-  try{await navigator.share({title:'Novagram 💜',text:post.caption||'Novagram Post',url});}catch(e){}
+  try{
+   await navigator.share({
+    title:'Novagram 💜',
+    text:post.caption||'Novagram Post',
+    url
+   });
+  }catch(e){}
  }else{
-  try{await navigator.clipboard.writeText(url);alert('Link copied!');}
-  catch(e){alert(url);}
+  try{
+   await navigator.clipboard.writeText(url);
+   alert('Link copied!');
+  }catch(e){
+   alert(url);
+  }
  }
 }
 
+/* Supabase login और password recovery */
 db.auth.onAuthStateChange((event,session)=>{
- if(session&&!currentUser)setTimeout(startApp,0);
+ if(event==='PASSWORD_RECOVERY'){
+  el('auth').classList.remove('hidden');
+  el('app').classList.add('hidden');
+  el('nav').classList.add('hidden');
+  el('resetBox').classList.remove('hidden');
+  message('authStatus','अब अपना नया पासवर्ड डालो।');
+ }
+
+ if(session&&!currentUser){
+  setTimeout(startApp,0);
+ }
 });
+
 startApp();
 </script>
 </body>
 </html>
+
 
