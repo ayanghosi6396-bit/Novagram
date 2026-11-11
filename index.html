@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -26,9 +27,15 @@ button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:wh
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 2px;z-index:20}
 nav button{background:white;color:#6424a5;font-size:11px;margin:0;padding:5px 1px;flex:1}
 nav span{display:block;font-size:21px;margin-bottom:3px}
-
-/* REELS */
-#reelsPage{padding:0;padding-bottom:0;background:#000;height:calc(100dvh - 115px);overflow:hidden}
+.follow-btn{background:#782bc4;color:white}
+.follow-btn.following{background:#eee;color:#42166c}
+.profile-stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0}
+.profile-stats b{display:block;font-size:19px}
+.user-card{background:white;border-radius:14px;padding:13px;margin:12px 0;box-shadow:0 2px 9px #0001}
+.user-card .post-head{margin:0}
+.user-name{cursor:pointer}
+.back-btn{background:#eee;color:#42166c}
+#reelsPage{padding:0;background:#000;height:calc(100dvh - 115px);overflow:hidden}
 #reelsPage h2{display:none}
 #reels{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scrollbar-width:none}
 #reels::-webkit-scrollbar{display:none}
@@ -42,14 +49,12 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .reel-user{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
 .reel-user img{width:38px;height:38px;border-radius:50%;border:2px solid white;object-fit:cover}
 .reel-caption{font-size:14px;line-height:1.5}
-.reel-follow{background:#fff!important;color:#7027bd!important;border-radius:20px!important;padding:7px 13px!important;font-size:12px!important;font-weight:bold;margin:0 0 0 3px!important;text-shadow:none!important}
-.reel-follow.following{background:#333b!important;color:white!important;border:1px solid #fff!important}
-.follower-count{display:block;font-size:11px;margin:3px 0 0 47px;color:#fff}
+.reel-follow{background:#fff!important;color:#7027bd!important;border-radius:20px!important;padding:7px 13px!important;font-size:12px!important;font-weight:bold}
+.reel-follow.following{background:#333b!important;color:white!important;border:1px solid white!important}
+.follower-count{display:block;font-size:11px;margin:3px 0 0 47px;color:white}
 .sound-btn{position:absolute;right:12px;top:18px;z-index:5;background:#2229;color:white;border-radius:50%;width:42px;height:42px;font-size:20px}
 .play-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:55px;color:white;background:#0005;border-radius:50%;padding:12px;display:none;pointer-events:none}
 .reel.paused .play-indicator{display:block}
-
-/* COMMENTS */
 #commentsModal{position:fixed;inset:0;background:#0009;z-index:1000;display:none;align-items:flex-end;justify-content:center}
 #commentsModal.open{display:flex}
 .comment-sheet{background:white;width:100%;max-width:600px;height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:#241333;overflow:hidden}
@@ -60,7 +65,6 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .comment-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .comment-content{flex:1;min-width:0;font-size:14px}
 .comment-meta{margin-bottom:5px}
-.comment-meta b{margin-right:5px}
 .comment-time{color:#999;font-size:11px}
 .comment-text{line-height:1.5;overflow-wrap:anywhere}
 .comment-tools{display:flex;gap:15px;margin-top:8px;align-items:center}
@@ -73,8 +77,6 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .comment-input-row{display:flex;gap:7px;align-items:center}
 .comment-input-row input{margin:0;border-radius:25px;flex:1;background:#f5f0ff;min-width:0}
 .comment-input-row button{border-radius:20px;font-weight:bold}
-
-/* ACTIVITY */
 .activity-title{font-size:19px;font-weight:bold;margin:8px 0 15px}
 .notification-card{background:white;border-radius:14px;padding:13px;margin:10px 0;box-shadow:0 2px 9px #0001}
 .notification-row{display:flex;gap:10px;align-items:center}
@@ -88,79 +90,86 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 <div id="status"></div>
 
 <section id="authPage" class="page active">
- <div class="card">
-  <h2>💜 Welcome to Novagram</h2>
-  <input id="email" type="email" placeholder="Email">
-  <input id="password" type="password" placeholder="Password">
-  <button onclick="login()">Login</button>
-  <button onclick="signup()">Create Account</button>
- </div>
+<div class="card">
+<h2>💜 Welcome to Novagram</h2>
+<input id="email" type="email" placeholder="Email">
+<input id="password" type="password" placeholder="Password">
+<button onclick="login()">Login</button>
+<button onclick="signup()">Create Account</button>
+</div>
 </section>
 
-<section id="homePage" class="page"><h2>🏠 Home Feed</h2><div id="feed"></div></section>
+<section id="homePage" class="page">
+<h2>🏠 Home Feed</h2>
+<div id="feed"></div>
+</section>
 
 <section id="searchPage" class="page">
- <h2>🔎 Search People</h2>
- <input id="searchInput" placeholder="Username search karo">
- <button onclick="searchPeople()">Search</button>
- <div id="searchResults"></div>
+<h2>🔎 Search People</h2>
+<input id="searchInput" placeholder="Username search karo">
+<button onclick="searchPeople()">Search</button>
+<div id="searchResults"></div>
 </section>
 
 <section id="addPage" class="page">
- <h2>➕ Create Post / Reel</h2>
- <div class="card">
-  <textarea id="caption" placeholder="What's on your mind?"></textarea>
-  <input id="mediaFile" type="file" accept="image/*,video/*">
-  <p class="muted">Photo ya video select karo (maximum 50 MB)</p>
-  <button onclick="uploadPost()">📤 Publish</button>
- </div>
+<h2>➕ Create Post / Reel</h2>
+<div class="card">
+<textarea id="caption" placeholder="What's on your mind?"></textarea>
+<input id="mediaFile" type="file" accept="image/*,video/*">
+<p class="muted">Photo ya video select karo (maximum 50 MB)</p>
+<button onclick="uploadPost()">📤 Publish</button>
+</div>
 </section>
 
-<section id="reelsPage" class="page"><h2>🎬 Reels</h2><div id="reels"></div></section>
+<section id="reelsPage" class="page">
+<h2>🎬 Reels</h2>
+<div id="reels"></div>
+</section>
 
 <section id="activityPage" class="page">
- <div class="activity-title">🔔 Notifications</div>
- <div id="activity">Novagram activity 💜</div>
+<div class="activity-title">🔔 Notifications</div>
+<div id="activity">Novagram activity 💜</div>
 </section>
 
 <section id="profilePage" class="page">
- <h2>☻ My Profile</h2>
- <div class="card" id="myProfile"></div>
- <button onclick="logout()">Logout</button>
- <h3>My Posts</h3><div id="myPosts"></div>
+<h2>☻ My Profile</h2>
+<div class="card" id="myProfile"></div>
+<button onclick="logout()">Logout</button>
+<h3>My Posts</h3>
+<div id="myPosts"></div>
 </section>
 
 <div id="commentsModal" onclick="if(event.target===this)closeComments()">
- <div class="comment-sheet">
-  <div class="comment-top">
-   <div class="comment-handle"></div>
-   Comments
-  </div>
-  <div id="commentList"><p class="muted">Comments loading...</p></div>
-  <div class="comment-footer">
-   <div class="comment-emojis">
-    <span onclick="addEmoji('❤️')">❤️</span>
-    <span onclick="addEmoji('😍')">😍</span>
-    <span onclick="addEmoji('😂')">😂</span>
-    <span onclick="addEmoji('😮')">😮</span>
-    <span onclick="addEmoji('🔥')">🔥</span>
-    <span onclick="addEmoji('👏')">👏</span>
-   </div>
-   <div class="comment-input-row">
-    <input id="commentInput" placeholder="Join the conversation..." onkeydown="if(event.key==='Enter')sendComment()">
-    <button onclick="sendComment()">Post</button>
-   </div>
-  </div>
- </div>
+<div class="comment-sheet">
+<div class="comment-top">
+<div class="comment-handle"></div>
+Comments
+</div>
+<div id="commentList"></div>
+<div class="comment-footer">
+<div class="comment-emojis">
+<span onclick="addEmoji('❤️')">❤️</span>
+<span onclick="addEmoji('😍')">😍</span>
+<span onclick="addEmoji('😂')">😂</span>
+<span onclick="addEmoji('😮')">😮</span>
+<span onclick="addEmoji('🔥')">🔥</span>
+<span onclick="addEmoji('👏')">👏</span>
+</div>
+<div class="comment-input-row">
+<input id="commentInput" placeholder="Join the conversation..." onkeydown="if(event.key==='Enter')sendComment()">
+<button onclick="sendComment()">Post</button>
+</div>
+</div>
+</div>
 </div>
 
 <nav id="bottomNav" class="hidden">
- <button onclick="showTab('home')"><span>⌂</span>Home</button>
- <button onclick="showTab('search')"><span>⌕</span>Search</button>
- <button onclick="showTab('add')"><span>⊕</span>Add</button>
- <button onclick="showTab('reels')"><span>▣</span>Reels</button>
- <button onclick="showTab('activity')"><span>♡</span>Activity</button>
- <button onclick="showTab('profile')"><span>☻</span>Profile</button>
+<button onclick="showTab('home')"><span>⌂</span>Home</button>
+<button onclick="showTab('search')"><span>⌕</span>Search</button>
+<button onclick="showTab('add')"><span>⊕</span>Add</button>
+<button onclick="showTab('reels')"><span>▣</span>Reels</button>
+<button onclick="showTab('activity')"><span>♡</span>Activity</button>
+<button onclick="showTab('profile')"><span>☻</span>Profile</button>
 </nav>
 
 <script>
@@ -176,23 +185,26 @@ let soundOn=false;
 let activeCommentPost=null;
 let replyToUser="";
 let commentLikes=JSON.parse(localStorage.getItem("novagram_comment_likes")||"[]");
+let currentViewedUser=null;
 
-function message(t){document.getElementById("status").textContent=t}
-function safe(t){return String(t||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-
+function message(t){
+ document.getElementById("status").textContent=t;
+}
+function safe(t){
+ return String(t||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
 function isVideoPost(post){
  const type=String(post.media_type||"").trim().toLowerCase();
  const url=String(post.media_url||"").split("?")[0].toLowerCase();
  return ["reel","video"].includes(type)||/\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(url);
 }
-
 function stopReels(){
  if(reelObserver){reelObserver.disconnect();reelObserver=null}
  document.querySelectorAll("#reels video").forEach(v=>v.pause());
 }
-
 function showTab(tab){
  stopReels();
+ currentViewedUser=null;
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById(tab+"Page").classList.add("active");
  if(tab==="home")loadFeed();
@@ -200,7 +212,6 @@ function showTab(tab){
  if(tab==="profile")loadProfile();
  if(tab==="activity")loadActivity();
 }
-
 async function login(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
@@ -208,9 +219,9 @@ async function login(){
  message("Login ho raha hai...");
  const {data,error}=await db.auth.signInWithPassword({email,password});
  if(error)return message(error.message);
- currentUser=data.user;await startApp();
+ currentUser=data.user;
+ await startApp();
 }
-
 async function signup(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
@@ -219,41 +230,47 @@ async function signup(){
  message("Account ban raha hai...");
  const {data,error}=await db.auth.signUp({email,password});
  if(error)return message(error.message);
- if(data.session){currentUser=data.user;await makeProfile();await startApp()}
- else message("Account ban gaya. Email verification karo, phir Login karo.");
+ if(data.session){
+  currentUser=data.user;
+  await makeProfile();
+  await startApp();
+ }else message("Account ban gaya. Email verification karo, phir Login karo.");
 }
-
 async function makeProfile(){
  if(!currentUser)return;
  const username=(currentUser.email||"novagram").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
  const {error}=await db.from("profiles").upsert({
-  id:currentUser.id,username,full_name:username,bio:"Welcome to Novagram 💜"
+  id:currentUser.id,
+  username,
+  full_name:username,
+  bio:"Welcome to Novagram 💜"
  },{onConflict:"id"});
- if(error)message(error.message);
+ if(error)message("Profile error: "+error.message);
 }
-
 async function startApp(){
  await makeProfile();
  document.getElementById("authPage").classList.remove("active");
  document.getElementById("bottomNav").classList.remove("hidden");
- showTab("home");message("💜 Welcome to Novagram");
+ showTab("home");
+ message("💜 Welcome to Novagram");
 }
-
 async function logout(){
- stopReels();await db.auth.signOut();currentUser=null;
+ stopReels();
+ await db.auth.signOut();
+ currentUser=null;
  document.getElementById("bottomNav").classList.add("hidden");
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById("authPage").classList.add("active");
  message("Logout ho gaya");
 }
-
 async function getProfiles(ids){
  if(!ids.length)return {};
  const {data,error}=await db.from("profiles").select("*").in("id",[...new Set(ids)]);
  if(error){message(error.message);return {}}
- const map={};(data||[]).forEach(p=>map[p.id]=p);return map;
+ const map={};
+ (data||[]).forEach(p=>map[p.id]=p);
+ return map;
 }
-
 async function getCounts(ids){
  if(!ids.length)return {likes:{},comments:{}};
  const [l,c]=await Promise.all([
@@ -263,73 +280,122 @@ async function getCounts(ids){
  if(l.error)message(l.error.message);
  if(c.error)message(c.error.message);
  const likes={},comments={};
- (l.data||[]).forEach(x=>{likes[x.post_id]??=[];likes[x.post_id].push(x.user_id)});
- (c.data||[]).forEach(x=>{comments[x.post_id]=(comments[x.post_id]||0)+1});
+ (l.data||[]).forEach(x=>{
+  likes[x.post_id]??=[];
+  likes[x.post_id].push(x.user_id);
+ });
+ (c.data||[]).forEach(x=>{
+  comments[x.post_id]=(comments[x.post_id]||0)+1;
+ });
  return {likes,comments};
 }
 
-/* FOLLOW */
+/* FOLLOW DATA */
 async function getFollowData(userIds){
- const ids=[...new Set(userIds)].filter(id=>id);
+ const ids=[...new Set(userIds)].filter(Boolean);
  const result={counts:{},following:{}};
  if(!ids.length)return result;
- const {data,error}=await db.from("follows").select("follower_id,following_id").in("following_id",ids);
- if(error){message("Follow data error: "+error.message);return result}
+ const {data,error}=await db.from("follows")
+  .select("follower_id,following_id")
+  .in("following_id",ids);
+ if(error){
+  message("Follow data error: "+error.message);
+  return result;
+ }
  (data||[]).forEach(row=>{
   result.counts[row.following_id]=(result.counts[row.following_id]||0)+1;
-  if(row.follower_id===currentUser.id)result.following[row.following_id]=true;
+  if(row.follower_id===currentUser.id){
+   result.following[row.following_id]=true;
+  }
  });
  return result;
 }
-
+async function getMyFollowStats(userId){
+ const [followers,following]=await Promise.all([
+  db.from("follows").select("id",{count:"exact",head:true}).eq("following_id",userId),
+  db.from("follows").select("id",{count:"exact",head:true}).eq("follower_id",userId)
+ ]);
+ if(followers.error)message(followers.error.message);
+ if(following.error)message(following.error.message);
+ return {
+  followers:followers.count||0,
+  following:following.count||0
+ };
+}
 async function toggleFollow(userId){
  if(!currentUser)return message("Pehle login karo");
- if(userId===currentUser.id)return;
- const {data,error}=await db.from("follows").select("id")
- .eq("follower_id",currentUser.id).eq("following_id",userId).maybeSingle();
+ if(userId===currentUser.id)return message("Apni ID ko follow nahi kar sakte");
+ const {data,error}=await db.from("follows")
+  .select("id")
+  .eq("follower_id",currentUser.id)
+  .eq("following_id",userId)
+  .maybeSingle();
  if(error)return message(error.message);
  let result;
  if(data){
-  result=await db.from("follows").delete().eq("follower_id",currentUser.id).eq("following_id",userId);
+  result=await db.from("follows").delete()
+   .eq("follower_id",currentUser.id)
+   .eq("following_id",userId);
  }else{
-  result=await db.from("follows").insert({follower_id:currentUser.id,following_id:userId});
+  result=await db.from("follows").insert({
+   follower_id:currentUser.id,
+   following_id:userId
+  });
  }
  if(result.error)return message(result.error.message);
  message(data?"Unfollow ho gaya":"Follow ho gaya 💜");
- await loadReels();
+ if(currentViewedUser===userId){
+  await openUserProfile(userId);
+ }else if(document.getElementById("reelsPage").classList.contains("active")){
+  await loadReels();
+ }else if(document.getElementById("searchPage").classList.contains("active")){
+  await searchPeople();
+ }
 }
 
+/* MEDIA */
 function mediaHTML(post){
- if(isVideoPost(post))return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
- if(String(post.media_type||"").trim().toLowerCase()==="image")return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
+ if(isVideoPost(post)){
+  return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
+ }
+ if(String(post.media_type||"").trim().toLowerCase()==="image"){
+  return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
+ }
  return "";
 }
-
 async function postCard(post,profile,counts){
  const liked=(counts.likes[post.id]||[]).includes(currentUser.id);
  const likeCount=(counts.likes[post.id]||[]).length;
  const commentCount=counts.comments[post.id]||0;
  const mine=post.user_id===currentUser.id;
  return `<article class="card">
- <div class="post-head"><img class="avatar" src="${safe(profile?.avatar_url||"https://placehold.co/80x80?text=User")}"><b>@${safe(profile?.username||"user")}</b></div>
- ${mediaHTML(post)}<p>${safe(post.caption)}</p>
+ <div class="post-head">
+ <img class="avatar" src="${safe(profile?.avatar_url||"https://placehold.co/80x80?text=User")}">
+ <b class="user-name" onclick="openUserProfile('${post.user_id}')">@${safe(profile?.username||"user")}</b>
+ </div>
+ ${mediaHTML(post)}
+ <p>${safe(post.caption)}</p>
  <div class="actions">
  <button class="${liked?"liked":""}" onclick="toggleLike('${post.id}')">♡ Like (${likeCount})</button>
  <button onclick="addComment('${post.id}')">💬 Comment (${commentCount})</button>
  <button onclick="sharePost('${post.id}')">➤ Share</button>
  ${mine?`<button onclick="deletePost('${post.id}')">Delete</button>`:""}
- </div></article>`;
+ </div>
+ </article>`;
 }
 
+/* HOME */
 async function loadFeed(){
  if(!currentUser)return;
- const box=document.getElementById("feed");box.innerHTML="Loading...";
+ const box=document.getElementById("feed");
+ box.innerHTML="Loading...";
  const {data,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
  if(error){box.textContent=error.message;return}
  if(!data?.length){box.innerHTML="<p>Abhi koi post nahi hai 💜</p>";return}
  const profiles=await getProfiles(data.map(p=>p.user_id));
  const counts=await getCounts(data.map(p=>p.id));
- let html="";for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
+ let html="";
+ for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
  box.innerHTML=html;
 }
 
@@ -337,11 +403,15 @@ async function loadFeed(){
 async function loadReels(){
  if(!currentUser)return;
  stopReels();
- const box=document.getElementById("reels");box.innerHTML="<p style='color:white;padding:20px'>Loading Reels...</p>";
+ const box=document.getElementById("reels");
+ box.innerHTML="<p style='color:white;padding:20px'>Loading Reels...</p>";
  const {data:allPosts,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
  if(error){box.textContent="Reels load nahi hui: "+error.message;return}
  const data=(allPosts||[]).filter(isVideoPost);
- if(!data.length){box.innerHTML="<p style='color:white;padding:20px'>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";return}
+ if(!data.length){
+  box.innerHTML="<p style='color:white;padding:20px'>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";
+  return;
+ }
  const ownerIds=data.map(p=>p.user_id);
  const profiles=await getProfiles(ownerIds);
  const counts=await getCounts(data.map(p=>p.id));
@@ -356,13 +426,13 @@ async function loadReels(){
   const followerCount=follows.counts[p.user_id]||0;
   const isFollowing=!!follows.following[p.user_id];
   return `
-  <article class="reel" data-reel="${safe(p.id)}">
+  <article class="reel">
    <video src="${safe(p.media_url)}" loop muted playsinline preload="metadata" onclick="toggleReelPlay(this)"></video>
    <div class="play-indicator">▶</div>
    <button class="sound-btn" onclick="toggleSound(this)">🔇</button>
    <div class="reel-side">
     <button class="reel-action ${liked?"active":""}" onclick="toggleLike('${p.id}',true)">❤️<small>${likeCount}</small></button>
-    <button class="reel-action" onclick="addComment('${p.id}',true)">💬<small>${commentCount}</small></button>
+    <button class="reel-action" onclick="addComment('${p.id}')">💬<small>${commentCount}</small></button>
     <button class="reel-action" onclick="sharePost('${p.id}')">➤<small>Share</small></button>
     <button class="reel-action ${isSaved?"active":""}" onclick="savePost('${p.id}')">🔖<small>Save</small></button>
     ${mine?`<button class="reel-action" onclick="deletePost('${p.id}')">🗑️<small>Delete</small></button>`:""}
@@ -370,7 +440,7 @@ async function loadReels(){
    <div class="reel-bottom">
     <div class="reel-user">
      <img src="${safe(profile.avatar_url||"https://placehold.co/80x80?text=User")}">
-     <b>@${safe(profile.username||"user")}</b>
+     <b onclick="openUserProfile('${p.user_id}')">@${safe(profile.username||"user")}</b>
      ${!mine?`<button class="reel-follow ${isFollowing?"following":""}" onclick="toggleFollow('${p.user_id}')">${isFollowing?"Following":"Follow"}</button>`:""}
     </div>
     <span class="follower-count">👥 ${followerCount} Followers</span>
@@ -378,9 +448,9 @@ async function loadReels(){
    </div>
   </article>`;
  }).join("");
- startReelObserver();message("💜 "+data.length+" Reels mil gayi");
+ startReelObserver();
+ message("💜 "+data.length+" Reels mil gayi");
 }
-
 function startReelObserver(){
  if(reelObserver)reelObserver.disconnect();
  const videos=document.querySelectorAll("#reels video");
@@ -388,39 +458,51 @@ function startReelObserver(){
   entries.forEach(entry=>{
    const video=entry.target;
    if(entry.isIntersecting&&entry.intersectionRatio>=0.65){
-    video.muted=!soundOn;video.play().catch(()=>{});
+    video.muted=!soundOn;
+    video.play().catch(()=>{});
     video.closest(".reel")?.classList.remove("paused");
    }else video.pause();
   });
  },{root:document.getElementById("reels"),threshold:[0,0.3,0.65,1]});
  videos.forEach(video=>reelObserver.observe(video));
 }
-
 function toggleReelPlay(video){
  const reel=video.closest(".reel");
- if(video.paused){video.play().catch(()=>{});reel.classList.remove("paused")}
- else{video.pause();reel.classList.add("paused")}
+ if(video.paused){
+  video.play().catch(()=>{});
+  reel.classList.remove("paused");
+ }else{
+  video.pause();
+  reel.classList.add("paused");
+ }
 }
 function toggleSound(button){
  soundOn=!soundOn;
  const video=button.closest(".reel").querySelector("video");
- video.muted=!soundOn;button.textContent=soundOn?"🔊":"🔇";
- if(soundOn)document.querySelectorAll("#reels video").forEach(v=>{if(v!==video)v.muted=true});
+ video.muted=!soundOn;
+ button.textContent=soundOn?"🔊":"🔇";
+ if(soundOn){
+  document.querySelectorAll("#reels video").forEach(v=>{
+   if(v!==video)v.muted=true;
+  });
+ }
 }
-
 async function toggleLike(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
  const {data,error}=await db.from("likes").select("post_id")
- .eq("post_id",postId).eq("user_id",currentUser.id).maybeSingle();
+  .eq("post_id",postId).eq("user_id",currentUser.id).maybeSingle();
  if(error)return message(error.message);
  let result;
- if(data)result=await db.from("likes").delete().eq("post_id",postId).eq("user_id",currentUser.id);
- else result=await db.from("likes").insert({post_id:postId,user_id:currentUser.id});
+ if(data){
+  result=await db.from("likes").delete().eq("post_id",postId).eq("user_id",currentUser.id);
+ }else{
+  result=await db.from("likes").insert({post_id:postId,user_id:currentUser.id});
+ }
  if(result.error)return message(result.error.message);
  if(isReel)loadReels();else loadFeed();
 }
 
-/* COMMENTS PANEL */
+/* COMMENTS */
 async function addComment(postId){
  if(!currentUser)return message("Pehle login karo");
  activeCommentPost=postId;
@@ -430,40 +512,32 @@ async function addComment(postId){
  document.getElementById("commentsModal").classList.add("open");
  await loadComments();
 }
-
 function closeComments(){
  document.getElementById("commentsModal").classList.remove("open");
 }
-
 function addEmoji(emoji){
  const input=document.getElementById("commentInput");
  input.value+=emoji;
  input.focus();
 }
-
 async function loadComments(){
  const box=document.getElementById("commentList");
  box.innerHTML="<p class='muted'>Comments loading...</p>";
-
  const {data,error}=await db.from("comments")
- .select("*").eq("post_id",activeCommentPost)
- .order("created_at",{ascending:true});
-
+  .select("*").eq("post_id",activeCommentPost)
+  .order("created_at",{ascending:true});
  if(error){box.textContent=error.message;return}
  if(!data?.length){
   box.innerHTML="<p class='muted'>Abhi koi comment nahi hai. Pehla comment karo 💜</p>";
   return;
  }
-
  const profiles=await getProfiles(data.map(c=>c.user_id));
-
  box.innerHTML=data.map(c=>{
   const p=profiles[c.user_id]||{};
   const username=p.username||"user";
   const avatar=p.avatar_url||"https://placehold.co/80x80?text=User";
   const liked=commentLikes.includes(String(c.id));
   const date=c.created_at?new Date(c.created_at).toLocaleDateString():"";
-
   return `
   <div class="comment-row">
    <img class="comment-avatar" src="${safe(avatar)}">
@@ -482,22 +556,18 @@ async function loadComments(){
   </div>`;
  }).join("");
 }
-
 async function sendComment(){
  if(!currentUser)return message("Pehle login karo");
  const input=document.getElementById("commentInput");
  let text=input.value.trim();
  if(!text)return;
  if(replyToUser)text="@"+replyToUser+" "+text;
-
  const {error}=await db.from("comments").insert({
   post_id:activeCommentPost,
   user_id:currentUser.id,
   comment:text
  });
-
  if(error)return message(error.message);
-
  input.value="";
  replyToUser="";
  input.placeholder="Join the conversation...";
@@ -506,14 +576,12 @@ async function sendComment(){
  if(document.getElementById("reelsPage").classList.contains("active"))loadReels();
  else loadFeed();
 }
-
 function replyComment(username){
  replyToUser=username;
  const input=document.getElementById("commentInput");
  input.placeholder="@"+username+" ko reply karo...";
  input.focus();
 }
-
 function likeComment(id){
  id=String(id);
  if(commentLikes.includes(id))commentLikes=commentLikes.filter(x=>x!==id);
@@ -521,11 +589,9 @@ function likeComment(id){
  localStorage.setItem("novagram_comment_likes",JSON.stringify(commentLikes));
  loadComments();
 }
-
 async function deleteComment(id){
  if(!confirm("Comment delete karein?"))return;
- const {error}=await db.from("comments").delete()
- .eq("id",id).eq("user_id",currentUser.id);
+ const {error}=await db.from("comments").delete().eq("id",id).eq("user_id",currentUser.id);
  if(error)return message(error.message);
  message("Comment delete ho gaya");
  await loadComments();
@@ -534,8 +600,14 @@ async function deleteComment(id){
 /* SHARE AND SAVE */
 async function sharePost(postId){
  const url=location.href.split("?")[0]+"?post="+postId;
- if(navigator.share){try{await navigator.share({title:"Novagram 💜",url})}catch(e){}}
- else{try{await navigator.clipboard.writeText(url);message("Post link copy ho gaya")}catch(e){message(url)}}
+ if(navigator.share){
+  try{await navigator.share({title:"Novagram 💜",url})}catch(e){}
+ }else{
+  try{
+   await navigator.clipboard.writeText(url);
+   message("Post link copy ho gaya");
+  }catch(e){message(url)}
+ }
 }
 function savePost(postId){
  if(savedPosts.includes(postId))savedPosts=savedPosts.filter(x=>x!==postId);
@@ -559,87 +631,202 @@ async function uploadPost(){
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
  const media_type=file.type.startsWith("video/")?"reel":"image";
  const {error}=await db.from("posts").insert({
-  user_id:currentUser.id,caption,media_url:urlData.publicUrl,media_type
+  user_id:currentUser.id,
+  caption,
+  media_url:urlData.publicUrl,
+  media_type
  });
  if(error)return message(error.message);
  document.getElementById("caption").value="";
  document.getElementById("mediaFile").value="";
- message("Post upload ho gayi 💜");showTab("home");
+ message("Post upload ho gayi 💜");
+ showTab("home");
 }
-
 async function deletePost(id){
  if(!confirm("Kya tum ye post delete karna chahte ho?"))return;
  const {error}=await db.from("posts").delete().eq("id",id).eq("user_id",currentUser.id);
  if(error)return message(error.message);
- message("Post delete ho gayi");showTab("home");
+ message("Post delete ho gayi");
+ showTab("home");
 }
 
-/* PROFILE */
+/* MY PROFILE */
 async function loadProfile(){
  if(!currentUser)return;
  const {data:p,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
  if(error)return message(error.message);
- document.getElementById("myProfile").innerHTML=
- `<h3>${safe(p?.full_name||"Novagram User")}</h3><p>@${safe(p?.username||"user")}</p><p>${safe(p?.bio||"Welcome to Novagram 💜")}</p><p class="muted">${safe(currentUser.email)}</p>`;
- const {data,error:postError}=await db.from("posts").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false});
+ const stats=await getMyFollowStats(currentUser.id);
+ document.getElementById("myProfile").innerHTML=`
+ <h3>${safe(p?.full_name||"Novagram User")}</h3>
+ <p>@${safe(p?.username||"user")}</p>
+ <p>${safe(p?.bio||"Welcome to Novagram 💜")}</p>
+ <div class="profile-stats">
+  <div><b id="myPostCount">0</b>Posts</div>
+  <div><b>${stats.followers}</b>Followers</div>
+  <div><b>${stats.following}</b>Following</div>
+ </div>
+ <p class="muted">${safe(currentUser.email)}</p>`;
+ const {data,error:postError}=await db.from("posts").select("*")
+  .eq("user_id",currentUser.id).order("created_at",{ascending:false});
  if(postError){document.getElementById("myPosts").textContent=postError.message;return}
+ document.getElementById("myPostCount").textContent=(data||[]).length;
  const counts=await getCounts((data||[]).map(x=>x.id));
- let html="";for(const post of (data||[]))html+=await postCard(post,p,counts);
+ let html="";
+ for(const post of (data||[]))html+=await postCard(post,p,counts);
  document.getElementById("myPosts").innerHTML=html||"Abhi koi post nahi hai";
 }
 
-/* SEARCH */
+/* SEARCH PEOPLE */
 async function searchPeople(){
- const q=document.getElementById("searchInput").value.trim();
+ if(!currentUser)return message("Pehle login karo");
+ const q=document.getElementById("searchInput").value.trim().replace(/^@/,"");
  if(!q)return message("Username likho");
- const {data,error}=await db.from("profiles").select("*").ilike("username","%"+q+"%").limit(20);
- if(error)return message(error.message);
- document.getElementById("searchResults").innerHTML=(data||[]).map(p=>
- `<div class="card"><b>@${safe(p.username)}</b><p>${safe(p.full_name||"")}</p></div>`
- ).join("")||"Koi user nahi mila";
+ const box=document.getElementById("searchResults");
+ box.innerHTML="Searching... 💜";
+ const {data,error}=await db.from("profiles")
+  .select("*")
+  .ilike("username","%"+q+"%")
+  .limit(30);
+ if(error){
+  box.textContent="Search error: "+error.message;
+  return;
+ }
+ if(!data||data.length===0){
+  box.innerHTML="<p>Koi user nahi mila 💜</p>";
+  return;
+ }
+ const ids=data.map(p=>p.id);
+ const [follows,statsResults]=await Promise.all([
+  getFollowData(ids),
+  Promise.all(ids.map(id=>getMyFollowStats(id)))
+ ]);
+ box.innerHTML=data.map((p,index)=>{
+  const mine=p.id===currentUser.id;
+  const following=!!follows.following[p.id];
+  const stats=statsResults[index];
+  return `
+  <div class="user-card">
+   <div class="post-head">
+    <img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}">
+    <div>
+     <b>@${safe(p.username||"user")}</b>
+     <p class="muted">${safe(p.full_name||"")}</p>
+    </div>
+   </div>
+   <p>${safe(p.bio||"Welcome to Novagram 💜")}</p>
+   <div class="profile-stats">
+    <div><b>${stats.followers}</b>Followers</div>
+    <div><b>${stats.following}</b>Following</div>
+   </div>
+   <button onclick="openUserProfile('${p.id}')">👤 View Profile</button>
+   ${mine?"":`
+    <button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${p.id}')">
+     ${following?"Following":"Follow"}
+    </button>`}
+  </div>`;
+ }).join("");
+}
+
+/* OTHER USER PROFILE */
+async function openUserProfile(userId){
+ if(!currentUser)return message("Pehle login karo");
+ currentViewedUser=userId;
+ stopReels();
+ const box=document.getElementById("searchResults");
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ document.getElementById("searchPage").classList.add("active");
+ box.innerHTML="Profile loading... 💜";
+ const {data:p,error}=await db.from("profiles")
+  .select("*").eq("id",userId).maybeSingle();
+ if(error){
+  box.textContent="Profile error: "+error.message;
+  return;
+ }
+ if(!p){
+  box.innerHTML="Profile nahi mili";
+  return;
+ }
+ const [stats,followResult]=await Promise.all([
+  getMyFollowStats(userId),
+  userId===currentUser.id
+   ?Promise.resolve({data:null,error:null})
+   :db.from("follows").select("id")
+     .eq("follower_id",currentUser.id)
+     .eq("following_id",userId)
+     .maybeSingle()
+ ]);
+ if(followResult.error){
+  box.textContent=followResult.error.message;
+  return;
+ }
+ const following=!!followResult.data;
+ const {data:posts,error:postError}=await db.from("posts")
+  .select("*").eq("user_id",userId)
+  .order("created_at",{ascending:false});
+ if(postError){
+  box.textContent=postError.message;
+  return;
+ }
+ const counts=await getCounts((posts||[]).map(post=>post.id));
+ let postHTML="";
+ for(const post of (posts||[])){
+  postHTML+=await postCard(post,p,counts);
+ }
+ box.innerHTML=`
+ <button class="back-btn" onclick="searchPeople()">← Back to Search</button>
+ <div class="user-card">
+  <div class="post-head">
+   <img class="avatar" style="width:65px;height:65px" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}">
+   <div>
+    <h2>${safe(p.full_name||"Novagram User")}</h2>
+    <b>@${safe(p.username||"user")}</b>
+   </div>
+  </div>
+  <p>${safe(p.bio||"Welcome to Novagram 💜")}</p>
+  <div class="profile-stats">
+   <div><b>${posts?.length||0}</b>Posts</div>
+   <div><b>${stats.followers}</b>Followers</div>
+   <div><b>${stats.following}</b>Following</div>
+  </div>
+  ${userId===currentUser.id
+   ?"<p class='muted'>Your profile 💜</p>"
+   :`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${userId}')">${following?"Following":"Follow"}</button>`}
+ </div>
+ <h3>Posts</h3>
+ ${postHTML||"<p>Abhi koi post nahi hai 💜</p>"}
+ `;
 }
 
 /* NOTIFICATIONS */
 async function loadActivity(){
  const box=document.getElementById("activity");
  if(!currentUser)return;
-
  box.innerHTML="Notifications loading... 💜";
-
  const {data,error}=await db.from("notifications")
-  .select("*")
-  .eq("recipient_id",currentUser.id)
-  .order("created_at",{ascending:false})
-  .limit(100);
-
+  .select("*").eq("recipient_id",currentUser.id)
+  .order("created_at",{ascending:false}).limit(100);
  if(error){
   box.textContent="Notification error: "+error.message;
   return;
  }
-
- if(!data || data.length===0){
+ if(!data||data.length===0){
   box.innerHTML="<div class='notification-card'>Abhi koi notification nahi hai 💜</div>";
   return;
  }
-
  const profiles=await getProfiles(data.map(n=>n.actor_id));
-
  const labels={
   follow:"ne tumhe follow kiya 💜",
   like:"ne tumhari Reel/Post like ki ❤️",
   comment:"ne tumhari Reel/Post par comment kiya 💬"
  };
-
  box.innerHTML=data.map(n=>{
   const p=profiles[n.actor_id]||{};
   const username=p.username||"user";
   const date=n.created_at?new Date(n.created_at).toLocaleString():"";
-
   return `
    <div class="notification-card" style="${n.is_read?"opacity:.65":""}">
     <div class="notification-row">
-     <img class="avatar"
-      src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}">
+     <img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}">
      <div class="notification-text">
       <b>@${safe(username)}</b>
       ${safe(labels[n.type]||"ne activity ki")}
@@ -648,36 +835,28 @@ async function loadActivity(){
      ${n.is_read?"":"<span class='notification-dot'>●</span>"}
     </div>
     ${n.is_read?"":`
-     <button onclick="markNotificationRead('${n.id}')">
-      Mark as read
-     </button>
-    `}
-   </div>
-  `;
+     <button onclick="markNotificationRead('${n.id}')">Mark as read</button>`}
+   </div>`;
  }).join("");
 }
-
 async function markNotificationRead(id){
  const {error}=await db.from("notifications")
   .update({is_read:true})
   .eq("id",id)
   .eq("recipient_id",currentUser.id);
-
- if(error){
-  message(error.message);
-  return;
- }
-
+ if(error)return message(error.message);
  await loadActivity();
 }
 
 async function init(){
  const {data,error}=await db.auth.getSession();
  if(error)return message(error.message);
- if(data.session){currentUser=data.session.user;await startApp()}
+ if(data.session){
+  currentUser=data.session.user;
+  await startApp();
+ }
 }
 init();
 </script>
 </body>
 </html>
-
