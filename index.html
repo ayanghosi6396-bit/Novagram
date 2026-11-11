@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -9,11 +10,10 @@
 *{box-sizing:border-box}
 body{margin:0;background:#f5f0ff;color:#291344;font-family:Arial,sans-serif}
 header{background:#7027bd;color:white;padding:15px;font-size:23px;font-weight:bold;position:sticky;top:0;z-index:10}
-.page{display:none;padding:12px;padding-bottom:85px}
+.page{display:none;padding:12px;padding-bottom:90px}
 .page.active{display:block}
 input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #d8c5ef;border-radius:10px;font-size:15px}
 button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:white;font-size:14px;cursor:pointer;margin:3px}
-button:disabled{opacity:.5}
 .card{background:white;border-radius:14px;padding:12px;margin:12px 0;box-shadow:0 2px 9px #0001}
 .post-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#e6d5fa}
@@ -21,8 +21,11 @@ button:disabled{opacity:.5}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .actions button{background:#f0e5fc;color:#42166c}
 .actions button.liked{color:#ed286b}
+.muted{color:#8b779d;font-size:13px}
+.hidden{display:none!important}
+#status{padding:8px;color:#6424a5;font-size:13px}
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:9px 2px;z-index:20}
-nav button{background:white;color:#6424a5;font-size:12px;margin:0;padding:6px 4px;flex:1}
+nav button{background:white;color:#6424a5;font-size:12px;margin:0;padding:6px 2px;flex:1}
 nav span{display:block;font-size:21px;margin-bottom:3px}
 .reel{height:calc(100dvh - 145px);min-height:430px;background:#000;color:white;position:relative;overflow:hidden;margin:8px 0;scroll-snap-align:start}
 .reel video{width:100%;height:100%;object-fit:contain;background:#000}
@@ -33,9 +36,6 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .reel-bottom{position:absolute;left:12px;bottom:14px;right:75px;z-index:3;color:white;text-shadow:0 1px 5px #000}
 .reel-user{display:flex;align-items:center;gap:8px;margin-bottom:8px}
 .reel-user img{width:36px;height:36px;border-radius:50%;border:2px solid white;object-fit:cover}
-.muted{color:#8b779d;font-size:13px}
-#status{padding:8px;color:#6424a5;font-size:13px}
-.hidden{display:none!important}
 </style>
 </head>
 <body>
@@ -82,8 +82,7 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 
 <section id="activityPage" class="page">
  <h2>♡ Activity</h2>
- <p>Novagram activity 💜</p>
- <div id="activity"></div>
+ <div id="activity">Novagram activity 💜</div>
 </section>
 
 <section id="profilePage" class="page">
@@ -104,18 +103,21 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 </nav>
 
 <script>
-const SUPABASE_URL = "https://gxnjbozxxjkfufxpiiiq.supabase.co";
-const SUPABASE_KEY = "sb_publishable_ptKLjPeypXVEmehGDTl_cQ_6ajAxQAV";
-const db = window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-const BUCKET = "Novagram_media";
-let currentUser = null;
-let savedPosts = JSON.parse(localStorage.getItem("novagram_saved") || "[]");
+const SUPABASE_URL="https://gxnjbozxxjkfufxpiiiq.supabase.co";
+const SUPABASE_KEY="sb_publishable_ptKLjPeypXVEmehGDTl_cQ_6ajAxQAV";
+const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+const BUCKET="Novagram_media";
 
-function message(text){
- document.getElementById("status").textContent=text;
+let currentUser=null;
+let savedPosts=JSON.parse(localStorage.getItem("novagram_saved")||"[]");
+
+function message(t){
+ document.getElementById("status").textContent=t;
 }
-function safe(text){
- return String(text || "").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function safe(t){
+ return String(t||"").replace(/[&<>"']/g,c=>({
+ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+ }[c]));
 }
 function showTab(tab){
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
@@ -153,10 +155,15 @@ async function signup(){
 }
 async function makeProfile(){
  if(!currentUser)return;
- const username=(currentUser.email||"novagram").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
- await db.from("profiles").upsert({
-  id:currentUser.id,username:username,full_name:username,bio:"Welcome to Novagram 💜"
+ const username=(currentUser.email||"novagram")
+ .split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
+ const {error}=await db.from("profiles").upsert({
+  id:currentUser.id,
+  username:username,
+  full_name:username,
+  bio:"Welcome to Novagram 💜"
  },{onConflict:"id"});
+ if(error)message(error.message);
 }
 async function startApp(){
  await makeProfile();
@@ -175,30 +182,38 @@ async function logout(){
 }
 async function getProfiles(ids){
  if(!ids.length)return {};
- const {data}=await db.from("profiles").select("*").in("id",[...new Set(ids)]);
+ const {data,error}=await db.from("profiles").select("*").in("id",[...new Set(ids)]);
+ if(error){message(error.message);return {}}
  const map={};
  (data||[]).forEach(p=>map[p.id]=p);
  return map;
 }
-async function getCounts(postIds){
- if(!postIds.length)return {likes:{},comments:{}};
+async function getCounts(ids){
+ if(!ids.length)return {likes:{},comments:{}};
  const [l,c]=await Promise.all([
-  db.from("likes").select("post_id,user_id").in("post_id",postIds),
-  db.from("comments").select("post_id").in("post_id",postIds)
+  db.from("likes").select("post_id,user_id").in("post_id",ids),
+  db.from("comments").select("post_id").in("post_id",ids)
  ]);
+ if(l.error)message(l.error.message);
+ if(c.error)message(c.error.message);
  const likes={},comments={};
  (l.data||[]).forEach(x=>{
   likes[x.post_id]??=[];
   likes[x.post_id].push(x.user_id);
  });
- (c.data||[]).forEach(x=>comments[x.post_id]=(comments[x.post_id]||0)+1);
+ (c.data||[]).forEach(x=>{
+  comments[x.post_id]=(comments[x.post_id]||0)+1;
+ });
  return {likes,comments};
 }
 function mediaHTML(post){
- if(post.media_type==="video"){
+ if(post.media_type==="reel"||post.media_type==="video"){
   return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
  }
- return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
+ if(post.media_type==="image"){
+  return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
+ }
+ return "";
 }
 async function postCard(post,profile,counts){
  const liked=(counts.likes[post.id]||[]).includes(currentUser.id);
@@ -225,7 +240,7 @@ async function loadFeed(){
  box.innerHTML="Loading...";
  const {data,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
  if(error){box.textContent=error.message;return}
- if(!data?.length){box.innerHTML="<p>Abhi koi post nahi hai. Pehli post upload karo 💜</p>";return}
+ if(!data?.length){box.innerHTML="<p>Abhi koi post nahi hai 💜</p>";return}
  const profiles=await getProfiles(data.map(p=>p.user_id));
  const counts=await getCounts(data.map(p=>p.id));
  let html="";
@@ -236,9 +251,16 @@ async function loadReels(){
  if(!currentUser)return;
  const box=document.getElementById("reels");
  box.innerHTML="Loading Reels...";
- const {data,error}=await db.from("posts").select("*").eq("media_type","video").order("created_at",{ascending:false});
+ // Supabase table mein video ka media_type "reel" hai
+ const {data,error}=await db.from("posts")
+ .select("*")
+ .eq("media_type","reel")
+ .order("created_at",{ascending:false});
  if(error){box.textContent=error.message;return}
- if(!data?.length){box.innerHTML="<p>Abhi koi Reel nahi hai. Add se video upload karo 💜</p>";return}
+ if(!data?.length){
+  box.innerHTML="<p>Abhi koi Reel nahi hai. Add se video upload karo 💜</p>";
+  return;
+ }
  const profiles=await getProfiles(data.map(p=>p.user_id));
  const counts=await getCounts(data.map(p=>p.id));
  box.innerHTML=data.map(p=>{
@@ -257,7 +279,10 @@ async function loadReels(){
     ${p.user_id===currentUser.id?`<button class="reel-action" onclick="deletePost('${p.id}')">🗑️<small>Delete</small></button>`:""}
    </div>
    <div class="reel-bottom">
-    <div class="reel-user"><img src="${safe(profile.avatar_url||"https://placehold.co/80x80?text=User")}"><b>@${safe(profile.username||"user")}</b></div>
+    <div class="reel-user">
+     <img src="${safe(profile.avatar_url||"https://placehold.co/80x80?text=User")}">
+     <b>@${safe(profile.username||"user")}</b>
+    </div>
     <div>${safe(p.caption)}</div>
    </div>
   </article>`;
@@ -265,11 +290,19 @@ async function loadReels(){
 }
 async function toggleLike(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
- const {data,error}=await db.from("likes").select("post_id").eq("post_id",postId).eq("user_id",currentUser.id).maybeSingle();
+ const {data,error}=await db.from("likes")
+ .select("post_id").eq("post_id",postId)
+ .eq("user_id",currentUser.id).maybeSingle();
  if(error)return message(error.message);
  let result;
- if(data)result=await db.from("likes").delete().eq("post_id",postId).eq("user_id",currentUser.id);
- else result=await db.from("likes").insert({post_id:postId,user_id:currentUser.id});
+ if(data){
+  result=await db.from("likes").delete()
+  .eq("post_id",postId).eq("user_id",currentUser.id);
+ }else{
+  result=await db.from("likes").insert({
+   post_id:postId,user_id:currentUser.id
+  });
+ }
  if(result.error)return message(result.error.message);
  if(isReel)loadReels();else loadFeed();
 }
@@ -288,14 +321,19 @@ async function sharePost(postId){
  const url=location.href.split("#")[0]+"?post="+postId;
  if(navigator.share){
   try{await navigator.share({title:"Novagram 💜",url});}catch(e){}
- }else if(navigator.clipboard){
-  await navigator.clipboard.writeText(url);
-  message("Post link copy ho gaya");
- }else message(url);
+ }else{
+  try{
+   await navigator.clipboard.writeText(url);
+   message("Post link copy ho gaya");
+  }catch(e){message(url)}
+ }
 }
 function savePost(postId){
- if(savedPosts.includes(postId))savedPosts=savedPosts.filter(x=>x!==postId);
- else savedPosts.push(postId);
+ if(savedPosts.includes(postId)){
+  savedPosts=savedPosts.filter(x=>x!==postId);
+ }else{
+  savedPosts.push(postId);
+ }
  localStorage.setItem("novagram_saved",JSON.stringify(savedPosts));
  loadReels();
 }
@@ -308,12 +346,17 @@ async function uploadPost(){
  message("Upload ho raha hai...");
  const ext=file.name.split(".").pop();
  const path=currentUser.id+"/"+Date.now()+"."+ext;
- const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{upsert:false});
+ const {error:uploadError}=await db.storage.from(BUCKET)
+ .upload(path,file,{upsert:false});
  if(uploadError)return message(uploadError.message);
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
- const media_type=file.type.startsWith("video/")?"video":"image";
+ // Video ko "reel" naam se save karna hai
+ const media_type=file.type.startsWith("video/")?"reel":"image";
  const {error}=await db.from("posts").insert({
-  user_id:currentUser.id,caption,media_url:urlData.publicUrl,media_type
+  user_id:currentUser.id,
+  caption:caption,
+  media_url:urlData.publicUrl,
+  media_type:media_type
  });
  if(error)return message(error.message);
  document.getElementById("caption").value="";
@@ -323,31 +366,36 @@ async function uploadPost(){
 }
 async function deletePost(id){
  if(!confirm("Kya tum ye post delete karna chahte ho?"))return;
- const {error}=await db.from("posts").delete().eq("id",id).eq("user_id",currentUser.id);
+ const {error}=await db.from("posts").delete()
+ .eq("id",id).eq("user_id",currentUser.id);
  if(error)return message(error.message);
  message("Post delete ho gayi");
  showTab("home");
 }
 async function loadProfile(){
  if(!currentUser)return;
- const {data:p}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
+ const {data:p,error}=await db.from("profiles")
+ .select("*").eq("id",currentUser.id).maybeSingle();
+ if(error)return message(error.message);
  document.getElementById("myProfile").innerHTML=
  `<h3>${safe(p?.full_name||"Novagram User")}</h3>
  <p>@${safe(p?.username||"user")}</p>
  <p>${safe(p?.bio||"Welcome to Novagram 💜")}</p>
  <p class="muted">${safe(currentUser.email)}</p>`;
- const {data,error}=await db.from("posts").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false});
- if(error){document.getElementById("myPosts").textContent=error.message;return}
+ const {data,error:postError}=await db.from("posts")
+ .select("*").eq("user_id",currentUser.id)
+ .order("created_at",{ascending:false});
+ if(postError){document.getElementById("myPosts").textContent=postError.message;return}
  const counts=await getCounts((data||[]).map(x=>x.id));
- document.getElementById("myPosts").innerHTML="";
- for(const post of (data||[])){
-  document.getElementById("myPosts").innerHTML+=await postCard(post,p,counts);
- }
+ let html="";
+ for(const post of (data||[]))html+=await postCard(post,p,counts);
+ document.getElementById("myPosts").innerHTML=html||"Abhi koi post nahi hai";
 }
 async function searchPeople(){
  const q=document.getElementById("searchInput").value.trim();
  if(!q)return message("Username likho");
- const {data,error}=await db.from("profiles").select("*").ilike("username","%"+q+"%").limit(20);
+ const {data,error}=await db.from("profiles")
+ .select("*").ilike("username","%"+q+"%").limit(20);
  if(error)return message(error.message);
  document.getElementById("searchResults").innerHTML=(data||[]).map(p=>
  `<div class="card"><b>@${safe(p.username)}</b><p>${safe(p.full_name||"")}</p></div>`
@@ -357,7 +405,8 @@ async function loadActivity(){
  document.getElementById("activity").innerHTML="Tumhari activity yahan dikhegi 💜";
 }
 async function init(){
- const {data}=await db.auth.getSession();
+ const {data,error}=await db.auth.getSession();
+ if(error)return message(error.message);
  if(data.session){
   currentUser=data.session.user;
   await startApp();
@@ -367,4 +416,3 @@ init();
 </script>
 </body>
 </html>
-
