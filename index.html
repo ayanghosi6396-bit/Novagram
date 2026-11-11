@@ -50,28 +50,12 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .play-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:55px;color:white;background:#0005;border-radius:50%;padding:12px;display:none;pointer-events:none}
 .reel.paused .play-indicator{display:block}
 
-/* INSTAGRAM STYLE COMMENTS */
-#commentsModal{
- position:fixed;inset:0;background:#0009;
- z-index:1000;display:none;
- align-items:flex-end;justify-content:center;
-}
+/* COMMENTS */
+#commentsModal{position:fixed;inset:0;background:#0009;z-index:1000;display:none;align-items:flex-end;justify-content:center}
 #commentsModal.open{display:flex}
-.comment-sheet{
- background:white;width:100%;max-width:600px;
- height:78vh;border-radius:20px 20px 0 0;
- display:flex;flex-direction:column;
- color:#241333;overflow:hidden;
-}
-.comment-top{
- padding:12px;text-align:center;
- border-bottom:1px solid #eee;
- font-weight:bold;font-size:17px;
-}
-.comment-handle{
- width:42px;height:4px;background:#ccc;
- border-radius:10px;margin:0 auto 10px;
-}
+.comment-sheet{background:white;width:100%;max-width:600px;height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:#241333;overflow:hidden}
+.comment-top{padding:12px;text-align:center;border-bottom:1px solid #eee;font-weight:bold;font-size:17px}
+.comment-handle{width:42px;height:4px;background:#ccc;border-radius:10px;margin:0 auto 10px}
 #commentList{flex:1;overflow-y:auto;padding:12px}
 .comment-row{display:flex;gap:10px;margin:17px 0;align-items:flex-start}
 .comment-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}
@@ -90,10 +74,17 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .comment-input-row{display:flex;gap:7px;align-items:center}
 .comment-input-row input{margin:0;border-radius:25px;flex:1;background:#f5f0ff;min-width:0}
 .comment-input-row button{border-radius:20px;font-weight:bold}
+
+/* ACTIVITY */
+.activity-title{font-size:19px;font-weight:bold;margin:8px 0 15px}
+.notification-card{background:white;border-radius:14px;padding:13px;margin:10px 0;box-shadow:0 2px 9px #0001}
+.notification-row{display:flex;gap:10px;align-items:center}
+.notification-text{flex:1;font-size:14px;line-height:1.5}
+.notification-dot{color:#782bc4;font-size:18px}
 </style>
 </head>
-
 <body>
+
 <header>💜 Novagram</header>
 <div id="status"></div>
 
@@ -127,7 +118,11 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 </section>
 
 <section id="reelsPage" class="page"><h2>🎬 Reels</h2><div id="reels"></div></section>
-<section id="activityPage" class="page"><h2>♡ Activity</h2><div id="activity">Novagram activity 💜</div></section>
+
+<section id="activityPage" class="page">
+ <div class="activity-title">🔔 Notifications</div>
+ <div id="activity">Novagram activity 💜</div>
+</section>
 
 <section id="profilePage" class="page">
  <h2>☻ My Profile</h2>
@@ -136,16 +131,13 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
  <h3>My Posts</h3><div id="myPosts"></div>
 </section>
 
-<!-- COMMENTS PANEL -->
 <div id="commentsModal" onclick="if(event.target===this)closeComments()">
  <div class="comment-sheet">
   <div class="comment-top">
    <div class="comment-handle"></div>
    Comments
   </div>
-  <div id="commentList">
-   <p class="muted">Comments loading...</p>
-  </div>
+  <div id="commentList"><p class="muted">Comments loading...</p></div>
   <div class="comment-footer">
    <div class="comment-emojis">
     <span onclick="addEmoji('❤️')">❤️</span>
@@ -608,8 +600,76 @@ async function searchPeople(){
  ).join("")||"Koi user nahi mila";
 }
 
+/* NOTIFICATIONS */
 async function loadActivity(){
- document.getElementById("activity").innerHTML="Tumhari activity yahan dikhegi 💜";
+ const box=document.getElementById("activity");
+ if(!currentUser)return;
+
+ box.innerHTML="Notifications loading... 💜";
+
+ const {data,error}=await db.from("notifications")
+  .select("*")
+  .eq("recipient_id",currentUser.id)
+  .order("created_at",{ascending:false})
+  .limit(100);
+
+ if(error){
+  box.textContent="Notification error: "+error.message;
+  return;
+ }
+
+ if(!data || data.length===0){
+  box.innerHTML="<div class='notification-card'>Abhi koi notification nahi hai 💜</div>";
+  return;
+ }
+
+ const profiles=await getProfiles(data.map(n=>n.actor_id));
+
+ const labels={
+  follow:"ne tumhe follow kiya 💜",
+  like:"ne tumhari Reel/Post like ki ❤️",
+  comment:"ne tumhari Reel/Post par comment kiya 💬"
+ };
+
+ box.innerHTML=data.map(n=>{
+  const p=profiles[n.actor_id]||{};
+  const username=p.username||"user";
+  const date=n.created_at?new Date(n.created_at).toLocaleString():"";
+
+  return `
+   <div class="notification-card" style="${n.is_read?"opacity:.65":""}">
+    <div class="notification-row">
+     <img class="avatar"
+      src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}">
+     <div class="notification-text">
+      <b>@${safe(username)}</b>
+      ${safe(labels[n.type]||"ne activity ki")}
+      <div class="muted">${safe(date)}</div>
+     </div>
+     ${n.is_read?"":"<span class='notification-dot'>●</span>"}
+    </div>
+    ${n.is_read?"":`
+     <button onclick="markNotificationRead('${n.id}')">
+      Mark as read
+     </button>
+    `}
+   </div>
+  `;
+ }).join("");
+}
+
+async function markNotificationRead(id){
+ const {error}=await db.from("notifications")
+  .update({is_read:true})
+  .eq("id",id)
+  .eq("recipient_id",currentUser.id);
+
+ if(error){
+  message(error.message);
+  return;
+ }
+
+ await loadActivity();
 }
 
 async function init(){
