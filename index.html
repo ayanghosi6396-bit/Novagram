@@ -18,7 +18,7 @@ button:disabled{opacity:.6}
 .card{background:white;border-radius:14px;padding:12px;margin:12px 0;box-shadow:0 2px 9px #0001}
 .post-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#e6d5fa}
-.profile-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #782bc4;display:block;margin:10px auto}
+.profile-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #782bc4;display:block;margin:10px auto;cursor:pointer}
 .post-media{width:100%;max-height:520px;object-fit:contain;background:#111;border-radius:8px}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .actions button{background:#f0e5fc;color:#42166c}
@@ -33,10 +33,24 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .follow-btn.following{background:#eee;color:#42166c}
 .profile-stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0}
 .profile-stats b{display:block;font-size:19px}
+.profile-stat-btn{background:transparent!important;color:#291344!important;margin:0;padding:5px;display:flex;flex-direction:column;align-items:center}
 .user-card{background:white;border-radius:14px;padding:13px;margin:12px 0;box-shadow:0 2px 9px #0001}
 .user-card .post-head{margin:0}
 .user-name{cursor:pointer}
 .back-btn{background:#eee;color:#42166c}
+.profile-top{display:flex;justify-content:space-between;align-items:center;position:relative}
+.profile-top h2{margin:8px 0}
+.menu-wrap{position:relative}
+.menu-btn{background:#f0e5fc;color:#42166c;font-size:25px;padding:5px 14px}
+.profile-menu{position:absolute;right:0;top:43px;z-index:50;background:white;box-shadow:0 3px 16px #0003;border-radius:12px;padding:7px;min-width:180px}
+.profile-menu button{display:block;width:100%;text-align:left;background:white;color:#42166c;padding:12px;margin:0}
+.profile-menu button:hover{background:#f5f0ff}
+#followList{margin-top:15px}
+.follow-list-head{display:flex;justify-content:space-between;align-items:center}
+.follow-list-head h3{margin:5px}
+.user-list-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:white;border-radius:12px;padding:10px;margin:8px 0}
+.user-list-info{display:flex;align-items:center;gap:9px;min-width:0}
+.user-list-info div{min-width:0;overflow-wrap:anywhere}
 #reelsPage{padding:0;background:#000;height:calc(100dvh - 115px);overflow:hidden}
 #reelsPage h2{display:none}
 #reels{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scrollbar-width:none}
@@ -133,9 +147,20 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 </section>
 
 <section id="profilePage" class="page">
+<div class="profile-top">
 <h2>☻ My Profile</h2>
+<div class="menu-wrap">
+<button class="menu-btn" onclick="toggleProfileMenu(event)">⋮</button>
+<div id="profileMenu" class="profile-menu hidden">
+<button onclick="editProfileOpen()">✏️ Edit Profile</button>
+<button onclick="showSettings()">⚙️ Settings</button>
+<button onclick="showPrivacy()">🔒 Privacy</button>
+<button onclick="showSavedPosts()">🔖 Saved</button>
+<button onclick="logout()">↪ Logout</button>
+</div>
+</div>
+</div>
 <div class="card" id="myProfile"></div>
-<button onclick="logout()">Logout</button>
 <h3>My Posts</h3>
 <div id="myPosts"></div>
 </section>
@@ -185,6 +210,8 @@ let replyToUser="";
 let commentLikes=JSON.parse(localStorage.getItem("novagram_comment_likes")||"[]");
 let currentViewedUser=null;
 let reelBusy={};
+let currentFollowListType=null;
+let currentFollowListUser=null;
 
 function message(t){document.getElementById("status").textContent=t}
 function safe(t){
@@ -306,7 +333,7 @@ async function toggleFollow(userId){
  if(userId===currentUser.id)return message("Apni ID ko follow nahi kar sakte");
  if(reelBusy["follow_"+userId])return;
  reelBusy["follow_"+userId]=true;
- const buttons=[...document.querySelectorAll("#reels [data-follow-user]")]
+ const buttons=[...document.querySelectorAll("[data-follow-user]")]
   .filter(b=>b.dataset.followUser===userId);
  buttons.forEach(b=>b.disabled=true);
  const {data,error}=await db.from("follows").select("id")
@@ -346,8 +373,94 @@ async function toggleFollow(userId){
  });
  reelBusy["follow_"+userId]=false;
  message(nowFollowing?"Follow ho gaya 💜":"Unfollow ho gaya");
+ if(currentFollowListUser){
+  await showFollowList(currentFollowListType,currentFollowListUser);
+ }
  if(currentViewedUser===userId)openUserProfile(userId);
  else if(document.getElementById("searchPage").classList.contains("active"))searchPeople();
+}
+
+/* FOLLOWERS AND FOLLOWING LIST */
+async function showFollowList(type,userId=currentUser?.id){
+ if(!currentUser||!userId)return message("Pehle login karo");
+ currentFollowListType=type;
+ currentFollowListUser=userId;
+ const box=document.getElementById("followList");
+ if(!box)return;
+ box.innerHTML="<p>Loading... 💜</p>";
+ const column=type==="followers"?"following_id":"follower_id";
+ const otherColumn=type==="followers"?"follower_id":"following_id";
+ const {data,error}=await db.from("follows")
+  .select("follower_id,following_id").eq(column,userId);
+ if(error){box.textContent=error.message;return}
+ const ids=[...new Set((data||[]).map(x=>x[otherColumn]).filter(Boolean))];
+ if(!ids.length){
+  box.innerHTML=`<div class="follow-list-head"><h3>${type==="followers"?"Followers":"Following"}</h3><button class="back-btn" onclick="closeFollowList()">Close</button></div><p class="muted">Abhi koi ${type==="followers"?"follower":"following"} nahi hai 💜</p>`;
+  return;
+ }
+ const [profiles,follows]=await Promise.all([getProfiles(ids),getFollowData(ids)]);
+ let html=`<div class="follow-list-head"><h3>${type==="followers"?"Followers":"Following"}</h3><button class="back-btn" onclick="closeFollowList()">Close</button></div>`;
+ html+=ids.map(id=>{
+  const p=profiles[id]||{};
+  const mine=id===currentUser.id;
+  const following=!!follows.following[id];
+  const avatar=p.avatar_url||"https://placehold.co/80x80?text=User";
+  return `<div class="user-list-row">
+   <div class="user-list-info">
+    <img class="avatar" src="${safe(avatar)}">
+    <div>
+     <b class="user-name" onclick="openUserProfile('${id}')">@${safe(p.username||"user")}</b>
+     <div class="muted">${safe(p.full_name||"")}</div>
+    </div>
+   </div>
+   ${mine?"":`<button class="follow-btn ${following?"following":""}" data-follow-user="${id}" onclick="toggleFollow('${id}')">${following?"Following":"Follow"}</button>`}
+  </div>`;
+ }).join("");
+ box.innerHTML=html;
+}
+function closeFollowList(){
+ currentFollowListType=null;
+ currentFollowListUser=null;
+ const box=document.getElementById("followList");
+ if(box)box.innerHTML="";
+}
+
+/* PROFILE MENU */
+function toggleProfileMenu(event){
+ if(event)event.stopPropagation();
+ document.getElementById("profileMenu")?.classList.toggle("hidden");
+}
+function closeProfileMenu(){
+ document.getElementById("profileMenu")?.classList.add("hidden");
+}
+function editProfileOpen(){
+ closeProfileMenu();
+ document.getElementById("editProfileArea")?.classList.toggle("hidden");
+}
+function showSettings(){
+ closeProfileMenu();
+ message("Settings ke options jald add honge 💜");
+}
+function showPrivacy(){
+ closeProfileMenu();
+ message("Privacy settings jald add hongi 💜");
+}
+async function showSavedPosts(){
+ closeProfileMenu();
+ const box=document.getElementById("myPosts");
+ if(!savedPosts.length){
+  box.innerHTML="<p>Abhi koi saved post nahi hai 💜</p>";
+  return;
+ }
+ const {data,error}=await db.from("posts").select("*").in("id",savedPosts);
+ if(error){box.textContent=error.message;return}
+ if(!data?.length){box.innerHTML="<p>Saved posts nahi mili 💜</p>";return}
+ const profiles=await getProfiles(data.map(p=>p.user_id));
+ const counts=await getCounts(data.map(p=>p.id));
+ let html="<h3>🔖 Saved Posts</h3>";
+ for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
+ box.innerHTML=html;
+ message("Saved posts 💜");
 }
 
 /* MEDIA */
@@ -640,30 +753,24 @@ async function deletePost(id){
  message("Post delete ho gayi");showTab("home");
 }
 
-/* PROFILE PHOTO UPLOAD */
+/* PROFILE PHOTO: SELECT KARTE HI UPLOAD */
 async function uploadProfilePhoto(){
  if(!currentUser)return message("Pehle login karo");
  const input=document.getElementById("profilePhotoFile");
- const file=input.files[0];
+ const file=input?.files?.[0];
  if(!file)return message("Pehle gallery se photo select karo");
  if(!file.type.startsWith("image/"))return message("Sirf image select karo");
  if(file.size>5*1024*1024)return message("Photo 5 MB se chhoti honi chahiye");
- const button=document.getElementById("profilePhotoButton");
- button.disabled=true;
  message("Profile photo upload ho rahi hai...");
  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
  const path="profile-photos/"+currentUser.id+"/"+Date.now()+"."+ext;
  const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{
   upsert:false,contentType:file.type
  });
- if(uploadError){
-  button.disabled=false;
-  return message("Photo upload error: "+uploadError.message);
- }
+ if(uploadError)return message("Photo upload error: "+uploadError.message);
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
  const {error:updateError}=await db.from("profiles")
   .update({avatar_url:urlData.publicUrl}).eq("id",currentUser.id);
- button.disabled=false;
  if(updateError)return message("Profile update error: "+updateError.message);
  message("Profile photo update ho gayi 💜");
  await loadProfile();
@@ -693,32 +800,34 @@ async function saveProfile(){
 /* MY PROFILE */
 async function loadProfile(){
  if(!currentUser)return;
+ closeFollowList();
  const {data:p,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
  if(error)return message(error.message);
  const stats=await getMyFollowStats(currentUser.id);
  const photo=p?.avatar_url||"https://placehold.co/120x120?text=User";
  document.getElementById("myProfile").innerHTML=`
- <img class="profile-photo" src="${safe(photo)}" alt="Profile Photo">
+ <input id="profilePhotoFile" type="file" accept="image/*" class="hidden" onchange="uploadProfilePhoto()">
+ <img class="profile-photo" src="${safe(photo)}" alt="Profile Photo"
+  onclick="document.getElementById('profilePhotoFile').click()">
+ <p class="muted" style="text-align:center">Photo badalne ke liye DP par click karo</p>
  <h3 style="text-align:center">${safe(p?.full_name||"Novagram User")}</h3>
  <p style="text-align:center">@${safe(p?.username||"user")}</p>
  <p style="text-align:center">${safe(p?.bio||"Welcome to Novagram 💜")}</p>
  <div class="profile-stats">
   <div><b id="myPostCount">0</b>Posts</div>
-  <div><b>${stats.followers}</b>Followers</div>
-  <div><b>${stats.following}</b>Following</div>
+  <button class="profile-stat-btn" onclick="showFollowList('followers')"><b>${stats.followers}</b>Followers</button>
+  <button class="profile-stat-btn" onclick="showFollowList('following')"><b>${stats.following}</b>Following</button>
  </div>
- <p class="muted">${safe(currentUser.email)}</p>
- <hr>
- <h3>✏️ Edit Profile</h3>
- <input id="editFullName" placeholder="Your Name" value="${safe(p?.full_name||"")}">
- <input id="editUsername" placeholder="Username" value="${safe(p?.username||"")}">
- <textarea id="editBio" placeholder="Your Bio">${safe(p?.bio||"")}</textarea>
- <button id="saveProfileButton" onclick="saveProfile()">💜 Save Profile</button>
- <hr>
- <h3>📸 Change Profile Photo</h3>
- <input id="profilePhotoFile" type="file" accept="image/*">
- <p class="muted">Gallery se photo select karo. Maximum 5 MB.</p>
- <button id="profilePhotoButton" onclick="uploadProfilePhoto()">📤 Upload Profile Photo</button>`;
+ <p class="muted" style="text-align:center">${safe(currentUser.email)}</p>
+ <div id="editProfileArea" class="hidden">
+  <hr>
+  <h3>✏️ Edit Profile</h3>
+  <input id="editFullName" placeholder="Your Name" value="${safe(p?.full_name||"")}">
+  <input id="editUsername" placeholder="Username" value="${safe(p?.username||"")}">
+  <textarea id="editBio" placeholder="Your Bio">${safe(p?.bio||"")}</textarea>
+  <button id="saveProfileButton" onclick="saveProfile()">💜 Save Profile</button>
+ </div>
+ <div id="followList"></div>`;
  const {data,error:postError}=await db.from("posts").select("*")
   .eq("user_id",currentUser.id).order("created_at",{ascending:false});
  if(postError){document.getElementById("myPosts").textContent=postError.message;return}
@@ -752,11 +861,11 @@ async function searchPeople(){
    </div>
    <p>${safe(p.bio||"Welcome to Novagram 💜")}</p>
    <div class="profile-stats">
-    <div><b>${stats.followers}</b>Followers</div>
-    <div><b>${stats.following}</b>Following</div>
+    <button class="profile-stat-btn" onclick="showFollowList('followers','${p.id}')"><b>${stats.followers}</b>Followers</button>
+    <button class="profile-stat-btn" onclick="showFollowList('following','${p.id}')"><b>${stats.following}</b>Following</button>
    </div>
    <button onclick="openUserProfile('${p.id}')">👤 View Profile</button>
-   ${mine?"":`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${p.id}')">${following?"Following":"Follow"}</button>`}
+   ${mine?"":`<button class="follow-btn ${following?"following":""}" data-follow-user="${p.id}" onclick="toggleFollow('${p.id}')">${following?"Following":"Follow"}</button>`}
   </div>`;
  }).join("");
 }
@@ -765,6 +874,8 @@ async function searchPeople(){
 async function openUserProfile(userId){
  if(!currentUser)return message("Pehle login karo");
  currentViewedUser=userId;stopReels();
+ closeFollowList();
+ closeProfileMenu();
  const box=document.getElementById("searchResults");
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById("searchPage").classList.add("active");
@@ -794,15 +905,19 @@ async function openUserProfile(userId){
   <p>${safe(p.bio||"Welcome to Novagram 💜")}</p>
   <div class="profile-stats">
    <div><b>${posts?.length||0}</b>Posts</div>
-   <div><b>${stats.followers}</b>Followers</div>
-   <div><b>${stats.following}</b>Following</div>
+   <button class="profile-stat-btn" onclick="showFollowList('followers','${userId}')"><b>${stats.followers}</b>Followers</button>
+   <button class="profile-stat-btn" onclick="showFollowList('following','${userId}')"><b>${stats.following}</b>Following</button>
   </div>
-  ${userId===currentUser.id?"<p class='muted'>Your profile 💜</p>":`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${userId}')">${following?"Following":"Follow"}</button>`}
+  ${userId===currentUser.id?"<p class='muted'>Your profile 💜</p>":`<button class="follow-btn ${following?"following":""}" data-follow-user="${userId}" onclick="toggleFollow('${userId}')">${following?"Following":"Follow"}</button>`}
+  <div id="otherFollowList"></div>
  </div>
  <h3>Posts</h3>
  ${postHTML||"<p>Abhi koi post nahi hai 💜</p>"}`;
+ // Other profile ki list ko usi profile ke andar dikhana
+ const oldFollowBox=document.getElementById("followList");
+ if(oldFollowBox)oldFollowBox.remove();
 }
-
+ 
 /* NOTIFICATIONS */
 async function loadActivity(){
  const box=document.getElementById("activity");
