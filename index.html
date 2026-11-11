@@ -97,6 +97,18 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 .notification-row{display:flex;gap:10px;align-items:center}
 .notification-text{flex:1;font-size:14px;line-height:1.5}
 .notification-dot{color:#782bc4;font-size:18px}
+
+/* STORIES */
+.story-circle{width:65px;height:65px;border-radius:50%;border:3px solid #a34bea;padding:3px;object-fit:cover;flex-shrink:0}
+.story-item{text-align:center;min-width:75px;font-size:12px;cursor:pointer}
+.story-strip{display:flex;gap:12px;overflow-x:auto;padding:12px 2px}
+.story-strip::-webkit-scrollbar{display:none}
+#storyViewer{position:fixed;inset:0;background:#08030d;z-index:2000;color:white;padding:15px;text-align:center;display:none}
+#storyViewer.open{display:block}
+#storyContent{height:75vh;display:flex;align-items:center;justify-content:center}
+#storyContent img,#storyContent video{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
+.story-viewer-top{display:flex;justify-content:space-between;align-items:center}
+#storyViewers{max-height:70px;overflow:auto;font-size:13px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -116,6 +128,15 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 
 <section id="homePage" class="page">
 <h2>🏠 Home Feed</h2>
+
+<div class="card">
+ <h3>💜 Novagram Stories</h3>
+ <input id="storyFile" type="file" accept="image/*,video/*">
+ <p class="muted">Photo ya video Story select karo (maximum 50 MB)</p>
+ <button onclick="uploadStory()">➕ Add Story</button>
+ <div id="storyList" class="story-strip"></div>
+</div>
+
 <div id="feed"></div>
 </section>
 
@@ -165,6 +186,16 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 <div id="myPosts"></div>
 </section>
 
+<div id="storyViewer">
+ <div class="story-viewer-top">
+  <b id="storyOwnerName">Novagram Story</b>
+  <button onclick="closeStory()">✕ Close</button>
+ </div>
+ <div id="storyContent"></div>
+ <div id="storyViewers"></div>
+ <button id="deleteStoryButton" onclick="deleteCurrentStory()">🗑️ Delete Story</button>
+</div>
+
 <div id="commentsModal" onclick="if(event.target===this)closeComments()">
 <div class="comment-sheet">
 <div class="comment-top"><div class="comment-handle"></div>Comments</div>
@@ -212,6 +243,10 @@ let currentViewedUser=null;
 let reelBusy={};
 let currentFollowListType=null;
 let currentFollowListUser=null;
+
+/* STORIES DATA */
+let storyData=[];
+let activeStory=null;
 
 function message(t){document.getElementById("status").textContent=t}
 function safe(t){
@@ -304,6 +339,149 @@ async function getCounts(ids){
  });
  (c.data||[]).forEach(x=>{comments[x.post_id]=(comments[x.post_id]||0)+1});
  return {likes,comments};
+}
+
+/* STORIES */
+async function uploadStory(){
+ if(!currentUser)return message("Pehle login karo");
+ const input=document.getElementById("storyFile");
+ const file=input.files[0];
+ if(!file)return message("Story ke liye photo ya video select karo");
+ if(!file.type.startsWith("image/")&&!file.type.startsWith("video/"))
+  return message("Sirf photo ya video Story laga sakte ho");
+ if(file.size>50*1024*1024)return message("Story 50 MB se chhoti honi chahiye");
+
+ message("Story upload ho rahi hai...");
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path="stories/"+currentUser.id+"/"+Date.now()+"."+ext;
+
+ const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{
+  upsert:false,contentType:file.type
+ });
+ if(uploadError)return message("Upload error: "+uploadError.message);
+
+ const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
+ const mediaType=file.type.startsWith("video/")?"video":"image";
+
+ const {error}=await db.from("stories").insert({
+  user_id:currentUser.id,
+  media_url:urlData.publicUrl,
+  media_type:mediaType
+ });
+ if(error)return message("Story save error: "+error.message);
+
+ input.value="";
+ message("Story lag gayi 💜");
+ await loadStories();
+}
+
+async function loadStories(){
+ if(!currentUser)return;
+ const list=document.getElementById("storyList");
+ if(!list)return;
+ list.innerHTML="<span class='muted'>Stories loading...</span>";
+
+ const cutoff=new Date(Date.now()-24*60*60*1000).toISOString();
+ const {data,error}=await db.from("stories").select("*")
+  .gt("created_at",cutoff).order("created_at",{ascending:true});
+
+ if(error){
+  list.innerHTML="<span class='muted'>Stories: "+safe(error.message)+"</span>";
+  return;
+ }
+
+ storyData=data||[];
+ if(!storyData.length){
+  list.innerHTML="<span class='muted'>Abhi koi Story nahi hai. Apni pehli Story lagao 💜</span>";
+  return;
+ }
+
+ const profiles=await getProfiles(storyData.map(s=>s.user_id));
+ const grouped={};
+ storyData.forEach(s=>{
+  if(!grouped[s.user_id])grouped[s.user_id]=[];
+  grouped[s.user_id].push(s);
+ });
+
+ let html="";
+ for(const userId of Object.keys(grouped)){
+  const p=profiles[userId]||{};
+  const stories=grouped[userId];
+  const latest=stories[stories.length-1];
+  const photo=p.avatar_url||"https://placehold.co/80x80?text=User";
+  html+=`<div class="story-item" onclick="openStory('${latest.id}')">
+   <img class="story-circle" src="${safe(photo)}">
+   <div>${userId===currentUser.id?"Your Story":"@"+safe(p.username||"user")}</div>
+   <div class="muted">${stories.length} Story</div>
+  </div>`;
+ }
+ list.innerHTML=html;
+}
+
+async function openStory(storyId){
+ const story=storyData.find(s=>s.id===storyId);
+ if(!story)return message("Story nahi mili");
+ activeStory=story;
+
+ const profiles=await getProfiles([story.user_id]);
+ const p=profiles[story.user_id]||{};
+ document.getElementById("storyOwnerName").textContent=
+  story.user_id===currentUser.id?"Your Story":"@"+(p.username||"user");
+
+ const content=document.getElementById("storyContent");
+ if(story.media_type==="video"){
+  content.innerHTML=`<video src="${safe(story.media_url)}" controls autoplay playsinline></video>`;
+ }else{
+  content.innerHTML=`<img src="${safe(story.media_url)}" alt="Story">`;
+ }
+
+ const own=story.user_id===currentUser.id;
+ document.getElementById("deleteStoryButton").classList.toggle("hidden",!own);
+ const viewers=document.getElementById("storyViewers");
+ viewers.innerHTML="";
+
+ if(own){
+  const {data,error}=await db.from("story_views").select("viewer_id,created_at")
+   .eq("story_id",story.id).order("created_at",{ascending:false});
+  if(error){
+   viewers.textContent="Viewers load nahi hue: "+error.message;
+  }else if(data?.length){
+   const vp=await getProfiles(data.map(v=>v.viewer_id));
+   viewers.innerHTML="<b>👀 Viewed by:</b> "+data.map(v=>
+    "@"+safe(vp[v.viewer_id]?.username||"user")
+   ).join(", ");
+  }else{
+   viewers.textContent="Abhi kisi ne Story nahi dekhi";
+  }
+ }else{
+  const {error}=await db.from("story_views").upsert({
+   story_id:story.id,viewer_id:currentUser.id
+  },{onConflict:"story_id,viewer_id",ignoreDuplicates:true});
+  if(error)message("View save nahi hua: "+error.message);
+  viewers.textContent="💜 Novagram Story";
+ }
+
+ document.getElementById("storyViewer").classList.add("open");
+}
+
+function closeStory(){
+ document.getElementById("storyViewer").classList.remove("open");
+ document.getElementById("storyContent").innerHTML="";
+ activeStory=null;
+}
+
+async function deleteCurrentStory(){
+ if(!currentUser||!activeStory)return;
+ if(activeStory.user_id!==currentUser.id)return message("Sirf apni Story delete kar sakte ho");
+ if(!confirm("Kya tum ye Story delete karna chahte ho?"))return;
+
+ const {error}=await db.from("stories").delete()
+  .eq("id",activeStory.id).eq("user_id",currentUser.id);
+ if(error)return message("Delete error: "+error.message);
+
+ closeStory();
+ message("Story delete ho gayi 💜");
+ await loadStories();
 }
 
 /* FOLLOW DATA */
@@ -460,7 +638,6 @@ async function showSavedPosts(){
  let html="<h3>🔖 Saved Posts</h3>";
  for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
  box.innerHTML=html;
- message("Saved posts 💜");
 }
 
 /* MEDIA */
@@ -492,6 +669,7 @@ async function postCard(post,profile,counts){
 /* HOME */
 async function loadFeed(){
  if(!currentUser)return;
+ await loadStories();
  const box=document.getElementById("feed");box.innerHTML="Loading...";
  const {data,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
  if(error){box.textContent=error.message;return}
@@ -753,7 +931,7 @@ async function deletePost(id){
  message("Post delete ho gayi");showTab("home");
 }
 
-/* PROFILE PHOTO: SELECT KARTE HI UPLOAD */
+/* PROFILE PHOTO */
 async function uploadProfilePhoto(){
  if(!currentUser)return message("Pehle login karo");
  const input=document.getElementById("profilePhotoFile");
@@ -913,11 +1091,10 @@ async function openUserProfile(userId){
  </div>
  <h3>Posts</h3>
  ${postHTML||"<p>Abhi koi post nahi hai 💜</p>"}`;
- // Other profile ki list ko usi profile ke andar dikhana
  const oldFollowBox=document.getElementById("followList");
  if(oldFollowBox)oldFollowBox.remove();
 }
- 
+
 /* NOTIFICATIONS */
 async function loadActivity(){
  const box=document.getElementById("activity");
