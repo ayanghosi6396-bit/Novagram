@@ -142,10 +142,7 @@ nav span{display:block;font-size:21px;margin-bottom:3px}
 
 <div id="commentsModal" onclick="if(event.target===this)closeComments()">
 <div class="comment-sheet">
-<div class="comment-top">
-<div class="comment-handle"></div>
-Comments
-</div>
+<div class="comment-top"><div class="comment-handle"></div>Comments</div>
 <div id="commentList"></div>
 <div class="comment-footer">
 <div class="comment-emojis">
@@ -241,7 +238,7 @@ async function makeProfile(){
  const username=(currentUser.email||"novagram").split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
  const {error}=await db.from("profiles").upsert({
   id:currentUser.id,username,full_name:username,bio:"Welcome to Novagram 💜"
- },{onConflict:"id"});
+ },{onConflict:"id",ignoreDuplicates:true});
  if(error)message("Profile error: "+error.message);
 }
 async function startApp(){
@@ -309,20 +306,16 @@ async function toggleFollow(userId){
  if(userId===currentUser.id)return message("Apni ID ko follow nahi kar sakte");
  if(reelBusy["follow_"+userId])return;
  reelBusy["follow_"+userId]=true;
-
  const buttons=[...document.querySelectorAll("#reels [data-follow-user]")]
   .filter(b=>b.dataset.followUser===userId);
  buttons.forEach(b=>b.disabled=true);
-
  const {data,error}=await db.from("follows").select("id")
   .eq("follower_id",currentUser.id).eq("following_id",userId).maybeSingle();
-
  if(error){
   buttons.forEach(b=>b.disabled=false);
   reelBusy["follow_"+userId]=false;
   return message(error.message);
  }
-
  let result;
  if(data){
   result=await db.from("follows").delete()
@@ -332,13 +325,11 @@ async function toggleFollow(userId){
    follower_id:currentUser.id,following_id:userId
   });
  }
-
  if(result.error){
   buttons.forEach(b=>b.disabled=false);
   reelBusy["follow_"+userId]=false;
   return message(result.error.message);
  }
-
  const nowFollowing=!data;
  buttons.forEach(b=>{
   b.textContent=nowFollowing?"Following":"Follow";
@@ -353,7 +344,6 @@ async function toggleFollow(userId){
   count+=nowFollowing?1:-1;
   n.textContent="👥 "+Math.max(0,count)+" Followers";
  });
-
  reelBusy["follow_"+userId]=false;
  message(nowFollowing?"Follow ho gaya 💜":"Unfollow ho gaya");
  if(currentViewedUser===userId)openUserProfile(userId);
@@ -474,7 +464,7 @@ function toggleSound(button){
  if(soundOn)document.querySelectorAll("#reels video").forEach(v=>{if(v!==video)v.muted=true});
 }
 
-/* LIKE: Reel ko reload nahi karta */
+/* LIKE */
 async function toggleLike(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
  if(reelBusy["like_"+postId])return;
@@ -482,7 +472,6 @@ async function toggleLike(postId,isReel=false){
  const buttons=[...document.querySelectorAll("#reels [data-like-post]")]
   .filter(b=>b.dataset.likePost===postId);
  buttons.forEach(b=>b.disabled=true);
-
  const {data,error}=await db.from("likes").select("post_id")
   .eq("post_id",postId).eq("user_id",currentUser.id).maybeSingle();
  if(error){
@@ -659,34 +648,45 @@ async function uploadProfilePhoto(){
  if(!file)return message("Pehle gallery se photo select karo");
  if(!file.type.startsWith("image/"))return message("Sirf image select karo");
  if(file.size>5*1024*1024)return message("Photo 5 MB se chhoti honi chahiye");
-
  const button=document.getElementById("profilePhotoButton");
  button.disabled=true;
  message("Profile photo upload ho rahi hai...");
-
  const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
  const path="profile-photos/"+currentUser.id+"/"+Date.now()+"."+ext;
-
  const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{
-  upsert:false,
-  contentType:file.type
+  upsert:false,contentType:file.type
  });
-
  if(uploadError){
   button.disabled=false;
   return message("Photo upload error: "+uploadError.message);
  }
-
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
  const {error:updateError}=await db.from("profiles")
-  .update({avatar_url:urlData.publicUrl})
-  .eq("id",currentUser.id);
-
+  .update({avatar_url:urlData.publicUrl}).eq("id",currentUser.id);
  button.disabled=false;
-
  if(updateError)return message("Profile update error: "+updateError.message);
-
  message("Profile photo update ho gayi 💜");
+ await loadProfile();
+}
+
+/* EDIT PROFILE */
+async function saveProfile(){
+ if(!currentUser)return message("Pehle login karo");
+ const full_name=document.getElementById("editFullName").value.trim();
+ const username=document.getElementById("editUsername").value.trim().replace(/^@/,"").toLowerCase();
+ const bio=document.getElementById("editBio").value.trim();
+ if(!full_name||!username)return message("Name aur Username zaroori hain");
+ if(!/^[a-z0-9_]{3,20}$/.test(username)){
+  return message("Username 3-20 characters ka ho, sirf letters, numbers aur _");
+ }
+ const button=document.getElementById("saveProfileButton");
+ button.disabled=true;
+ message("Profile save ho rahi hai...");
+ const {error}=await db.from("profiles")
+  .update({full_name,username,bio}).eq("id",currentUser.id);
+ button.disabled=false;
+ if(error)return message("Profile error: "+error.message);
+ message("Profile update ho gayi 💜");
  await loadProfile();
 }
 
@@ -697,7 +697,6 @@ async function loadProfile(){
  if(error)return message(error.message);
  const stats=await getMyFollowStats(currentUser.id);
  const photo=p?.avatar_url||"https://placehold.co/120x120?text=User";
-
  document.getElementById("myProfile").innerHTML=`
  <img class="profile-photo" src="${safe(photo)}" alt="Profile Photo">
  <h3 style="text-align:center">${safe(p?.full_name||"Novagram User")}</h3>
@@ -709,12 +708,17 @@ async function loadProfile(){
   <div><b>${stats.following}</b>Following</div>
  </div>
  <p class="muted">${safe(currentUser.email)}</p>
- <hr style="border:0;border-top:1px solid #eee;margin:15px 0">
+ <hr>
+ <h3>✏️ Edit Profile</h3>
+ <input id="editFullName" placeholder="Your Name" value="${safe(p?.full_name||"")}">
+ <input id="editUsername" placeholder="Username" value="${safe(p?.username||"")}">
+ <textarea id="editBio" placeholder="Your Bio">${safe(p?.bio||"")}</textarea>
+ <button id="saveProfileButton" onclick="saveProfile()">💜 Save Profile</button>
+ <hr>
  <h3>📸 Change Profile Photo</h3>
  <input id="profilePhotoFile" type="file" accept="image/*">
  <p class="muted">Gallery se photo select karo. Maximum 5 MB.</p>
  <button id="profilePhotoButton" onclick="uploadProfilePhoto()">📤 Upload Profile Photo</button>`;
-
  const {data,error:postError}=await db.from("posts").select("*")
   .eq("user_id",currentUser.id).order("created_at",{ascending:false});
  if(postError){document.getElementById("myPosts").textContent=postError.message;return}
