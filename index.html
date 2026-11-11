@@ -18,6 +18,7 @@ button:disabled{opacity:.6}
 .card{background:white;border-radius:14px;padding:12px;margin:12px 0;box-shadow:0 2px 9px #0001}
 .post-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
 .avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#e6d5fa}
+.profile-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #782bc4;display:block;margin:10px auto}
 .post-media{width:100%;max-height:520px;object-fit:contain;background:#111;border-radius:8px}
 .actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:8px}
 .actions button{background:#f0e5fc;color:#42166c}
@@ -582,7 +583,6 @@ async function sendComment(){
   if(small)small.textContent=Number(small.textContent||0)+1;
  });
  await loadComments();
- /* Reel ko reload nahi karna */
 }
 function replyComment(username){
  replyToUser=username;
@@ -622,7 +622,7 @@ function savePost(postId){
  if(button)button.classList.toggle("active",savedPosts.includes(postId));
 }
 
-/* UPLOAD */
+/* POST UPLOAD */
 async function uploadPost(){
  if(!currentUser)return message("Pehle login karo");
  const file=document.getElementById("mediaFile").files[0];
@@ -651,22 +651,70 @@ async function deletePost(id){
  message("Post delete ho gayi");showTab("home");
 }
 
+/* PROFILE PHOTO UPLOAD */
+async function uploadProfilePhoto(){
+ if(!currentUser)return message("Pehle login karo");
+ const input=document.getElementById("profilePhotoFile");
+ const file=input.files[0];
+ if(!file)return message("Pehle gallery se photo select karo");
+ if(!file.type.startsWith("image/"))return message("Sirf image select karo");
+ if(file.size>5*1024*1024)return message("Photo 5 MB se chhoti honi chahiye");
+
+ const button=document.getElementById("profilePhotoButton");
+ button.disabled=true;
+ message("Profile photo upload ho rahi hai...");
+
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase();
+ const path="profile-photos/"+currentUser.id+"/"+Date.now()+"."+ext;
+
+ const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{
+  upsert:false,
+  contentType:file.type
+ });
+
+ if(uploadError){
+  button.disabled=false;
+  return message("Photo upload error: "+uploadError.message);
+ }
+
+ const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
+ const {error:updateError}=await db.from("profiles")
+  .update({avatar_url:urlData.publicUrl})
+  .eq("id",currentUser.id);
+
+ button.disabled=false;
+
+ if(updateError)return message("Profile update error: "+updateError.message);
+
+ message("Profile photo update ho gayi 💜");
+ await loadProfile();
+}
+
 /* MY PROFILE */
 async function loadProfile(){
  if(!currentUser)return;
  const {data:p,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
  if(error)return message(error.message);
  const stats=await getMyFollowStats(currentUser.id);
+ const photo=p?.avatar_url||"https://placehold.co/120x120?text=User";
+
  document.getElementById("myProfile").innerHTML=`
- <h3>${safe(p?.full_name||"Novagram User")}</h3>
- <p>@${safe(p?.username||"user")}</p>
- <p>${safe(p?.bio||"Welcome to Novagram 💜")}</p>
+ <img class="profile-photo" src="${safe(photo)}" alt="Profile Photo">
+ <h3 style="text-align:center">${safe(p?.full_name||"Novagram User")}</h3>
+ <p style="text-align:center">@${safe(p?.username||"user")}</p>
+ <p style="text-align:center">${safe(p?.bio||"Welcome to Novagram 💜")}</p>
  <div class="profile-stats">
   <div><b id="myPostCount">0</b>Posts</div>
   <div><b>${stats.followers}</b>Followers</div>
   <div><b>${stats.following}</b>Following</div>
  </div>
- <p class="muted">${safe(currentUser.email)}</p>`;
+ <p class="muted">${safe(currentUser.email)}</p>
+ <hr style="border:0;border-top:1px solid #eee;margin:15px 0">
+ <h3>📸 Change Profile Photo</h3>
+ <input id="profilePhotoFile" type="file" accept="image/*">
+ <p class="muted">Gallery se photo select karo. Maximum 5 MB.</p>
+ <button id="profilePhotoButton" onclick="uploadProfilePhoto()">📤 Upload Profile Photo</button>`;
+
  const {data,error:postError}=await db.from("posts").select("*")
   .eq("user_id",currentUser.id).order("created_at",{ascending:false});
  if(postError){document.getElementById("myPosts").textContent=postError.message;return}
