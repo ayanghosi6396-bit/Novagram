@@ -6,11 +6,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Novagram 💜</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f5f0ff;color:#291344;font-family:Arial,sans-serif}
 header{background:#7027bd;color:white;padding:15px;font-size:23px;font-weight:bold;position:sticky;top:0;z-index:10}
-.page{display:none;padding:12px;padding-bottom:90px}
+.page{display:none;padding:12px;padding-bottom:85px}
 .page.active{display:block}
 input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #d8c5ef;border-radius:10px;font-size:15px}
 button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:white;font-size:14px;cursor:pointer;margin:3px}
@@ -24,20 +25,126 @@ button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:wh
 .muted{color:#8b779d;font-size:13px}
 .hidden{display:none!important}
 #status{padding:8px;color:#6424a5;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:9px 2px;z-index:20}
-nav button{background:white;color:#6424a5;font-size:12px;margin:0;padding:6px 2px;flex:1}
+
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:8px 2px;z-index:20}
+nav button{background:white;color:#6424a5;font-size:11px;margin:0;padding:5px 1px;flex:1}
 nav span{display:block;font-size:21px;margin-bottom:3px}
-.reel{height:calc(100dvh - 145px);min-height:430px;background:#000;color:white;position:relative;overflow:hidden;margin:8px 0;scroll-snap-align:start;border-radius:10px}
-.reel video{width:100%;height:100%;object-fit:contain;background:#000}
-.reel-side{position:absolute;right:9px;bottom:85px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:14px}
-.reel-action{background:#17171766!important;color:white!important;padding:5px!important;font-size:27px!important;text-shadow:0 2px 5px #000;display:flex;flex-direction:column;align-items:center;min-width:48px}
+
+/* FULL SCREEN REELS */
+#reelsPage{
+ padding:0;
+ padding-bottom:0;
+ background:#000;
+ height:calc(100dvh - 115px);
+ overflow:hidden;
+}
+#reelsPage h2{display:none}
+#reels{
+ height:100%;
+ width:100%;
+ overflow-y:auto;
+ overflow-x:hidden;
+ scroll-snap-type:y mandatory;
+ overscroll-behavior-y:contain;
+ scrollbar-width:none;
+}
+#reels::-webkit-scrollbar{display:none}
+
+.reel{
+ height:100%;
+ min-height:100%;
+ width:100%;
+ position:relative;
+ background:#000;
+ color:white;
+ overflow:hidden;
+ scroll-snap-align:start;
+ scroll-snap-stop:always;
+}
+.reel video{
+ width:100%;
+ height:100%;
+ object-fit:cover;
+ background:#000;
+}
+.reel-side{
+ position:absolute;
+ right:10px;
+ bottom:100px;
+ z-index:4;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ gap:16px;
+}
+.reel-action{
+ background:#17171766!important;
+ color:white!important;
+ padding:5px!important;
+ font-size:27px!important;
+ text-shadow:0 2px 5px #000;
+ display:flex;
+ flex-direction:column;
+ align-items:center;
+ min-width:45px;
+}
 .reel-action small{font-size:11px;color:white}
 .reel-action.active{color:#ff4b87!important}
-.reel-bottom{position:absolute;left:12px;bottom:14px;right:75px;z-index:3;color:white;text-shadow:0 1px 5px #000}
-.reel-user{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.reel-user img{width:36px;height:36px;border-radius:50%;border:2px solid white;object-fit:cover}
+
+.reel-bottom{
+ position:absolute;
+ left:13px;
+ bottom:22px;
+ right:70px;
+ z-index:4;
+ color:white;
+ text-shadow:0 1px 5px #000;
+}
+.reel-user{
+ display:flex;
+ align-items:center;
+ gap:9px;
+ margin-bottom:10px;
+}
+.reel-user img{
+ width:38px;
+ height:38px;
+ border-radius:50%;
+ border:2px solid white;
+ object-fit:cover;
+}
+.reel-caption{font-size:14px;line-height:1.5}
+
+.sound-btn{
+ position:absolute;
+ right:12px;
+ top:18px;
+ z-index:5;
+ background:#2229;
+ color:white;
+ border-radius:50%;
+ width:42px;
+ height:42px;
+ font-size:20px;
+}
+.play-indicator{
+ position:absolute;
+ top:50%;
+ left:50%;
+ transform:translate(-50%,-50%);
+ font-size:55px;
+ color:white;
+ background:#0005;
+ border-radius:50%;
+ padding:12px;
+ display:none;
+ pointer-events:none;
+}
+.reel.paused .play-indicator{display:block}
+
 </style>
 </head>
+
 <body>
 
 <header>💜 Novagram</header>
@@ -110,29 +217,46 @@ const BUCKET="Novagram_media";
 
 let currentUser=null;
 let savedPosts=JSON.parse(localStorage.getItem("novagram_saved")||"[]");
+let reelObserver=null;
+let soundOn=false;
 
 function message(t){
  document.getElementById("status").textContent=t;
 }
+
 function safe(t){
  return String(t||"").replace(/[&<>"']/g,c=>({
  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
  }[c]));
 }
+
 function isVideoPost(post){
  const type=String(post.media_type||"").trim().toLowerCase();
  const url=String(post.media_url||"").split("?")[0].toLowerCase();
  return ["reel","video"].includes(type) ||
-        /\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(url);
+ /\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(url);
 }
+
+function stopReels(){
+ if(reelObserver){
+  reelObserver.disconnect();
+  reelObserver=null;
+ }
+ document.querySelectorAll("#reels video").forEach(v=>v.pause());
+}
+
 function showTab(tab){
+ stopReels();
+
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById(tab+"Page").classList.add("active");
+
  if(tab==="home")loadFeed();
  if(tab==="reels")loadReels();
  if(tab==="profile")loadProfile();
  if(tab==="activity")loadActivity();
 }
+
 async function login(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
@@ -143,6 +267,7 @@ async function login(){
  currentUser=data.user;
  await startApp();
 }
+
 async function signup(){
  const email=document.getElementById("email").value.trim();
  const password=document.getElementById("password").value;
@@ -159,18 +284,22 @@ async function signup(){
   message("Account ban gaya. Email verification karo, phir Login karo.");
  }
 }
+
 async function makeProfile(){
  if(!currentUser)return;
  const username=(currentUser.email||"novagram")
  .split("@")[0].replace(/[^a-z0-9_]/gi,"").toLowerCase();
+
  const {error}=await db.from("profiles").upsert({
   id:currentUser.id,
   username:username,
   full_name:username,
   bio:"Welcome to Novagram 💜"
  },{onConflict:"id"});
+
  if(error)message(error.message);
 }
+
 async function startApp(){
  await makeProfile();
  document.getElementById("authPage").classList.remove("active");
@@ -178,7 +307,9 @@ async function startApp(){
  showTab("home");
  message("💜 Welcome to Novagram");
 }
+
 async function logout(){
+ stopReels();
  await db.auth.signOut();
  currentUser=null;
  document.getElementById("bottomNav").classList.add("hidden");
@@ -186,6 +317,7 @@ async function logout(){
  document.getElementById("authPage").classList.add("active");
  message("Logout ho gaya");
 }
+
 async function getProfiles(ids){
  if(!ids.length)return {};
  const {data,error}=await db.from("profiles").select("*").in("id",[...new Set(ids)]);
@@ -194,24 +326,32 @@ async function getProfiles(ids){
  (data||[]).forEach(p=>map[p.id]=p);
  return map;
 }
+
 async function getCounts(ids){
  if(!ids.length)return {likes:{},comments:{}};
+
  const [l,c]=await Promise.all([
   db.from("likes").select("post_id,user_id").in("post_id",ids),
   db.from("comments").select("post_id").in("post_id",ids)
  ]);
+
  if(l.error)message(l.error.message);
  if(c.error)message(c.error.message);
+
  const likes={},comments={};
+
  (l.data||[]).forEach(x=>{
   likes[x.post_id]??=[];
   likes[x.post_id].push(x.user_id);
  });
+
  (c.data||[]).forEach(x=>{
   comments[x.post_id]=(comments[x.post_id]||0)+1;
  });
+
  return {likes,comments};
 }
+
 function mediaHTML(post){
  if(isVideoPost(post)){
   return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
@@ -221,11 +361,13 @@ function mediaHTML(post){
  }
  return "";
 }
+
 async function postCard(post,profile,counts){
  const liked=(counts.likes[post.id]||[]).includes(currentUser.id);
  const likeCount=(counts.likes[post.id]||[]).length;
  const commentCount=counts.comments[post.id]||0;
  const mine=post.user_id===currentUser.id;
+
  return `<article class="card">
  <div class="post-head">
  <img class="avatar" src="${safe(profile?.avatar_url||"https://placehold.co/80x80?text=User")}">
@@ -240,27 +382,35 @@ async function postCard(post,profile,counts){
  ${mine?`<button onclick="deletePost('${post.id}')">Delete</button>`:""}
  </div></article>`;
 }
+
 async function loadFeed(){
  if(!currentUser)return;
  const box=document.getElementById("feed");
  box.innerHTML="Loading...";
+
  const {data,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
+
  if(error){box.textContent=error.message;return}
  if(!data?.length){box.innerHTML="<p>Abhi koi post nahi hai 💜</p>";return}
+
  const profiles=await getProfiles(data.map(p=>p.user_id));
  const counts=await getCounts(data.map(p=>p.id));
+
  let html="";
  for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
  box.innerHTML=html;
 }
 
-/* Fixed Reels loader */
+/* INSTAGRAM STYLE REELS */
+
 async function loadReels(){
  if(!currentUser)return;
- const box=document.getElementById("reels");
- box.innerHTML="Loading Reels...";
 
- // Pehle sab posts lao, phir video posts alag chuno
+ stopReels();
+
+ const box=document.getElementById("reels");
+ box.innerHTML="<p style='color:white;padding:20px'>Loading Reels...</p>";
+
  const {data:allPosts,error}=await db.from("posts")
  .select("*")
  .order("created_at",{ascending:false});
@@ -273,8 +423,7 @@ async function loadReels(){
  const data=(allPosts||[]).filter(isVideoPost);
 
  if(!data.length){
-  box.innerHTML="<p>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";
-  message("Posts check hui: "+(allPosts||[]).length+" | Video Reels: 0");
+  box.innerHTML="<p style='color:white;padding:20px'>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";
   return;
  }
 
@@ -288,34 +437,130 @@ async function loadReels(){
   const commentCount=counts.comments[p.id]||0;
   const isSaved=savedPosts.includes(p.id);
 
-  return `<article class="reel">
-   <video src="${safe(p.media_url)}" autoplay muted loop playsinline controls></video>
+  return `
+  <article class="reel" data-reel="${safe(p.id)}">
+
+   <video
+    src="${safe(p.media_url)}"
+    loop
+    muted
+    playsinline
+    preload="metadata"
+    onclick="toggleReelPlay(this)"
+   ></video>
+
+   <div class="play-indicator">▶</div>
+
+   <button class="sound-btn" onclick="toggleSound(this)">🔇</button>
+
    <div class="reel-side">
-    <button class="reel-action ${liked?"active":""}" onclick="toggleLike('${p.id}',true)">❤️<small>${likeCount}</small></button>
-    <button class="reel-action" onclick="addComment('${p.id}',true)">💬<small>${commentCount}</small></button>
-    <button class="reel-action" onclick="sharePost('${p.id}')">➤<small>Share</small></button>
-    <button class="reel-action ${isSaved?"active":""}" onclick="savePost('${p.id}')">🔖<small>Save</small></button>
-    ${p.user_id===currentUser.id?`<button class="reel-action" onclick="deletePost('${p.id}')">🗑️<small>Delete</small></button>`:""}
+
+    <button class="reel-action ${liked?"active":""}"
+     onclick="toggleLike('${p.id}',true)">
+     ❤️<small>${likeCount}</small>
+    </button>
+
+    <button class="reel-action"
+     onclick="addComment('${p.id}',true)">
+     💬<small>${commentCount}</small>
+    </button>
+
+    <button class="reel-action"
+     onclick="sharePost('${p.id}')">
+     ➤<small>Share</small>
+    </button>
+
+    <button class="reel-action ${isSaved?"active":""}"
+     onclick="savePost('${p.id}')">
+     🔖<small>Save</small>
+    </button>
+
+    ${p.user_id===currentUser.id?
+    `<button class="reel-action" onclick="deletePost('${p.id}')">🗑️<small>Delete</small></button>`:""}
+
    </div>
+
    <div class="reel-bottom">
     <div class="reel-user">
      <img src="${safe(profile.avatar_url||"https://placehold.co/80x80?text=User")}">
      <b>@${safe(profile.username||"user")}</b>
     </div>
-    <div>${safe(p.caption)}</div>
+    <div class="reel-caption">${safe(p.caption)}</div>
    </div>
+
   </article>`;
  }).join("");
 
+ startReelObserver();
  message("💜 "+data.length+" Reels mil gayi");
 }
+
+/* Automatic Play / Pause on Swipe */
+
+function startReelObserver(){
+ if(reelObserver)reelObserver.disconnect();
+
+ const videos=document.querySelectorAll("#reels video");
+
+ reelObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   const video=entry.target;
+
+   if(entry.isIntersecting && entry.intersectionRatio>=0.65){
+    video.muted=!soundOn;
+    video.play().catch(()=>{});
+    video.closest(".reel")?.classList.remove("paused");
+   }else{
+    video.pause();
+   }
+  });
+ },{
+  root:document.getElementById("reels"),
+  threshold:[0,0.3,0.65,1]
+ });
+
+ videos.forEach(video=>reelObserver.observe(video));
+}
+
+function toggleReelPlay(video){
+ const reel=video.closest(".reel");
+
+ if(video.paused){
+  video.play().catch(()=>{});
+  reel.classList.remove("paused");
+ }else{
+  video.pause();
+  reel.classList.add("paused");
+ }
+}
+
+function toggleSound(button){
+ soundOn=!soundOn;
+
+ const currentReel=button.closest(".reel");
+ const video=currentReel.querySelector("video");
+
+ video.muted=!soundOn;
+ button.textContent=soundOn?"🔊":"🔇";
+
+ if(soundOn){
+  document.querySelectorAll("#reels video").forEach(v=>{
+   if(v!==video)v.muted=true;
+  });
+ }
+}
+
 async function toggleLike(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
+
  const {data,error}=await db.from("likes")
  .select("post_id").eq("post_id",postId)
  .eq("user_id",currentUser.id).maybeSingle();
+
  if(error)return message(error.message);
+
  let result;
+
  if(data){
   result=await db.from("likes").delete()
   .eq("post_id",postId).eq("user_id",currentUser.id);
@@ -324,24 +569,40 @@ async function toggleLike(postId,isReel=false){
    post_id:postId,user_id:currentUser.id
   });
  }
+
  if(result.error)return message(result.error.message);
- if(isReel)loadReels();else loadFeed();
+
+ if(isReel)loadReels();
+ else loadFeed();
 }
+
 async function addComment(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
+
  const comment=prompt("Apna comment likho:");
  if(!comment||!comment.trim())return;
+
  const {error}=await db.from("comments").insert({
-  post_id:postId,user_id:currentUser.id,comment:comment.trim()
+  post_id:postId,
+  user_id:currentUser.id,
+  comment:comment.trim()
  });
+
  if(error)return message(error.message);
+
  message("Comment post ho gaya 💜");
- if(isReel)loadReels();else loadFeed();
+
+ if(isReel)loadReels();
+ else loadFeed();
 }
+
 async function sharePost(postId){
- const url=location.href.split("#")[0]+"?post="+postId;
+ const url=location.href.split("?")[0]+"?post="+postId;
+
  if(navigator.share){
-  try{await navigator.share({title:"Novagram 💜",url});}catch(e){}
+  try{
+   await navigator.share({title:"Novagram 💜",url});
+  }catch(e){}
  }else{
   try{
    await navigator.clipboard.writeText(url);
@@ -349,89 +610,130 @@ async function sharePost(postId){
   }catch(e){message(url)}
  }
 }
+
 function savePost(postId){
  if(savedPosts.includes(postId)){
   savedPosts=savedPosts.filter(x=>x!==postId);
  }else{
   savedPosts.push(postId);
  }
+
  localStorage.setItem("novagram_saved",JSON.stringify(savedPosts));
  loadReels();
 }
+
 async function uploadPost(){
  if(!currentUser)return message("Pehle login karo");
+
  const file=document.getElementById("mediaFile").files[0];
  const caption=document.getElementById("caption").value.trim();
+
  if(!file)return message("Pehle photo ya video select karo");
  if(file.size>50*1024*1024)return message("File 50 MB se chhoti honi chahiye");
+
  message("Upload ho raha hai...");
+
  const ext=file.name.split(".").pop();
  const path=currentUser.id+"/"+Date.now()+"."+ext;
+
  const {error:uploadError}=await db.storage.from(BUCKET)
  .upload(path,file,{upsert:false});
+
  if(uploadError)return message(uploadError.message);
+
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
+
  const media_type=file.type.startsWith("video/")?"reel":"image";
+
  const {error}=await db.from("posts").insert({
   user_id:currentUser.id,
   caption:caption,
   media_url:urlData.publicUrl,
   media_type:media_type
  });
+
  if(error)return message(error.message);
+
  document.getElementById("caption").value="";
  document.getElementById("mediaFile").value="";
+
  message("Post upload ho gayi 💜");
  showTab("home");
 }
+
 async function deletePost(id){
  if(!confirm("Kya tum ye post delete karna chahte ho?"))return;
+
  const {error}=await db.from("posts").delete()
  .eq("id",id).eq("user_id",currentUser.id);
+
  if(error)return message(error.message);
+
  message("Post delete ho gayi");
  showTab("home");
 }
+
 async function loadProfile(){
  if(!currentUser)return;
+
  const {data:p,error}=await db.from("profiles")
  .select("*").eq("id",currentUser.id).maybeSingle();
+
  if(error)return message(error.message);
+
  document.getElementById("myProfile").innerHTML=
  `<h3>${safe(p?.full_name||"Novagram User")}</h3>
  <p>@${safe(p?.username||"user")}</p>
  <p>${safe(p?.bio||"Welcome to Novagram 💜")}</p>
  <p class="muted">${safe(currentUser.email)}</p>`;
+
  const {data,error:postError}=await db.from("posts")
  .select("*").eq("user_id",currentUser.id)
  .order("created_at",{ascending:false});
- if(postError){document.getElementById("myPosts").textContent=postError.message;return}
+
+ if(postError){
+  document.getElementById("myPosts").textContent=postError.message;
+  return;
+ }
+
  const counts=await getCounts((data||[]).map(x=>x.id));
  let html="";
+
  for(const post of (data||[]))html+=await postCard(post,p,counts);
+
  document.getElementById("myPosts").innerHTML=html||"Abhi koi post nahi hai";
 }
+
 async function searchPeople(){
  const q=document.getElementById("searchInput").value.trim();
+
  if(!q)return message("Username likho");
+
  const {data,error}=await db.from("profiles")
  .select("*").ilike("username","%"+q+"%").limit(20);
+
  if(error)return message(error.message);
+
  document.getElementById("searchResults").innerHTML=(data||[]).map(p=>
  `<div class="card"><b>@${safe(p.username)}</b><p>${safe(p.full_name||"")}</p></div>`
  ).join("")||"Koi user nahi mila";
 }
+
 async function loadActivity(){
  document.getElementById("activity").innerHTML="Tumhari activity yahan dikhegi 💜";
 }
+
 async function init(){
  const {data,error}=await db.auth.getSession();
+
  if(error)return message(error.message);
+
  if(data.session){
   currentUser=data.session.user;
   await startApp();
  }
 }
+
 init();
 </script>
 </body>
