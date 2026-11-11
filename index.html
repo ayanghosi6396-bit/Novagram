@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -7,112 +8,183 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#f5f0ff;color:#291344;font-family:Arial}
-header{background:linear-gradient(120deg,#4c1d95,#9333ea);color:white;padding:17px;text-align:center;position:sticky;top:0;z-index:5}
-header h2{margin:0}
-main{max-width:600px;margin:auto;padding:12px;padding-bottom:85px}
-.card{background:white;padding:15px;border-radius:16px;margin:13px 0;box-shadow:0 3px 12px #ddd}
-input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:10px;font-size:15px}
-button{border:0;border-radius:10px;padding:12px;background:#7026bb;color:white;font-weight:bold;cursor:pointer}
-button:disabled{opacity:.6}
+body{margin:0;background:#faf7ff;color:#251333;font-family:Arial,sans-serif}
+header{height:58px;background:white;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 15px;position:sticky;top:0;z-index:5}
+.logo{font-size:25px;font-weight:bold;color:#7929c7}
+.header-actions button{background:none;color:#7929c7;font-size:22px;padding:5px}
+main{max-width:620px;margin:auto;padding:8px 10px 85px}
+.card{background:white;border:1px solid #eee;border-radius:13px;padding:13px;margin:10px 0}
+input,textarea,select{width:100%;padding:12px;margin:7px 0;border:1px solid #ddd;border-radius:9px;font-size:15px;background:white}
+textarea{min-height:75px}
+button{border:0;border-radius:9px;padding:10px 13px;background:#7929c7;color:white;font-weight:bold;cursor:pointer}
+button:disabled{opacity:.5}
 .full{width:100%;margin:5px 0}
-.secondary{background:#eee;color:#542080}
-.danger{background:#dc2626!important;color:white!important}
+.secondary{background:#f0e7fa;color:#62249c}
+.danger{background:#d92d55;color:white}
 .hidden{display:none!important}
-.post img,.post video,.public-post img,.public-post video{width:100%;max-height:500px;object-fit:contain;border-radius:12px;margin-top:10px;background:#eee}
-.post-actions{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
-.post-actions button{flex:1;padding:10px 3px;font-size:13px;min-width:65px}
-nav{position:fixed;bottom:0;left:0;right:0;background:white;display:flex;justify-content:space-around;padding:12px 3px;box-shadow:0 -2px 12px #ddd;z-index:10}
-nav button{background:transparent;color:#7026bb;font-size:19px;padding:8px}
-.small{font-size:12px;color:#777}
-.avatar{width:75px;height:75px;border-radius:50%;object-fit:cover;background:#eee}
-.post-header{display:flex;align-items:center;gap:10px;margin-bottom:10px}
-.post-avatar{width:43px;height:43px;border-radius:50%;object-fit:cover;background:#eee}
-.post-user{flex:1;min-width:0}
+.small{font-size:12px;color:#888}
+.muted{color:#777}
+.stories{display:flex;gap:13px;overflow-x:auto;padding:12px 5px;background:white;border:1px solid #eee;border-radius:12px;margin:8px 0}
+.story{min-width:65px;text-align:center;font-size:11px;color:#555}
+.story img{width:57px;height:57px;border-radius:50%;object-fit:cover;padding:3px;border:2px solid #a43ce5}
+.story b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+.post{background:white;border:1px solid #eee;border-radius:12px;margin:12px 0;overflow:hidden}
+.post-header{display:flex;align-items:center;gap:10px;padding:11px}
+.avatar{width:43px;height:43px;border-radius:50%;object-fit:cover;background:#eee}
+.post-user{flex:1;min-width:0;cursor:pointer}
 .post-user b{display:block}
-.post-user span{font-size:12px;color:#777}
-.follow-btn{padding:8px 12px;font-size:12px}
+.post-user span{font-size:12px;color:#888}
+.post-media{display:block;width:100%;max-height:560px;object-fit:contain;background:#130e18}
+.post-caption{padding:8px 12px;margin:0;white-space:pre-wrap}
+.post-actions{display:flex;gap:5px;padding:8px 10px;flex-wrap:wrap}
+.post-actions button{flex:1;min-width:65px;font-size:13px;padding:9px 3px}
 .like-active{background:#fce7f3;color:#be185d}
-.person{display:flex;align-items:center;gap:12px}
+.post-date{padding:0 12px 10px}
+nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:7px 1px calc(7px + env(safe-area-inset-bottom));z-index:10}
+nav button{background:transparent;color:#6c269f;font-size:21px;padding:5px 2px;flex:1}
+nav button small{display:block;font-size:10px;font-weight:normal;margin-top:3px}
+.person{display:flex;align-items:center;gap:10px}
 .person-info{flex:1;min-width:0}
-.person-info p{margin:5px 0}
-.stats{display:flex;gap:25px;margin:15px 0}
+.person-info p{margin:4px 0}
+.stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0}
 .stats b{display:block;font-size:19px}
-.clickable{cursor:pointer}
+.profile-top{display:flex;align-items:center;gap:20px;padding:10px 3px}
+.profile-top .avatar{width:85px;height:85px}
+.profile-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:10px}
+.profile-grid img,.profile-grid video{width:100%;aspect-ratio:1;object-fit:cover;background:#eee}
+.reels-container{height:calc(100dvh - 135px);overflow-y:auto;scroll-snap-type:y mandatory}
+.reel{height:calc(100dvh - 140px);min-height:430px;background:#100b16;color:white;border-radius:12px;position:relative;overflow:hidden;scroll-snap-align:start;margin:6px 0}
+.reel video{width:100%;height:100%;object-fit:contain;background:#000}
+.reel-info{position:absolute;bottom:12px;left:12px;right:12px;text-shadow:0 1px 5px black}
+.reel-info button{background:#fff;color:#49206d;margin-top:5px}
 .public-head{display:flex;align-items:center;gap:15px}
-.public-head .avatar{width:90px;height:90px}
+.public-head .avatar{width:85px;height:85px}
+.section-title{font-size:18px;font-weight:bold;margin:16px 3px 8px}
+.search-result{padding:12px;border-bottom:1px solid #eee}
+#auth{max-width:420px;margin:35px auto}
+.activity-item{padding:12px;border-bottom:1px solid #eee;font-size:14px}
 </style>
 </head>
 <body>
 
 <header>
-<h2>💜 Novagram</h2>
-<p>Connect • Share • Discover</p>
+<div class="logo">Novagram 💜</div>
+<div class="header-actions">
+<button onclick="showTab('activity')">♡</button>
+<button onclick="showTab('profile')">☻</button>
+</div>
 </header>
 
 <main>
-<section class="card" id="auth">
-<h3>Welcome to Novagram 💜</h3>
+<section id="auth" class="card">
+<h2>Welcome to Novagram 💜</h2>
 <input id="email" type="email" placeholder="Email">
 <input id="password" type="password" placeholder="Password">
 <button class="full" onclick="signup()">Create Account</button>
 <button class="full secondary" onclick="login()">Login</button>
-<p id="authStatus"></p>
+<p id="authStatus" class="small"></p>
 </section>
 
 <section id="app" class="hidden">
-<div class="card">
-<h3 id="welcome">💜 Welcome</h3>
-<button class="secondary" onclick="logout()">Logout</button>
-</div>
 
 <section id="home">
+<div class="stories">
+<div class="story">
+<img id="storyAvatar" src="https://placehold.co/100x100?text=+" alt="Your profile">
+<b>Your story</b>
+</div>
+<div class="story">
+<img src="https://placehold.co/100x100?text=+" alt="Stories">
+<b>Stories</b>
+</div>
+<div class="story">
+<img src="https://placehold.co/100x100?text=+" alt="Stories">
+<b>Stories</b>
+</div>
+<div class="story">
+<img src="https://placehold.co/100x100?text=+" alt="Stories">
+<b>Stories</b>
+</div>
+</div>
+
 <div class="card">
 <h3>➕ Create Post / Reel</h3>
 <textarea id="caption" placeholder="What's on your mind?"></textarea>
-<label><b>📸 Gallery से फोटो या वीडियो चुनें</b></label>
+<select id="postType">
+<option value="image">📸 Photo Post</option>
+<option value="reel">🎬 Reel Video</option>
+</select>
 <input id="media" type="file" accept="image/*,video/*">
 <p class="small">अधिकतम 50 MB</p>
 <button class="full" onclick="publish()">📤 Publish</button>
-<p id="uploadStatus"></p>
+<p id="uploadStatus" class="small"></p>
 </div>
-<h3>💜 Feed</h3>
+
+<div class="section-title">💜 Feed</div>
 <div id="feed">Loading...</div>
 </section>
 
 <section id="discover" class="hidden">
 <div class="card">
-<h3>🔍 Discover People</h3>
-<p class="small">दूसरे लोगों को खोजो और Follow करो।</p>
-<button class="full" onclick="loadPeople()">🔄 Refresh People</button>
+<h3>🔍 Search & Discover</h3>
+<input id="searchInput" placeholder="Username या नाम खोजो..." oninput="filterPeople()">
+<button class="full secondary" onclick="loadPeople()">Refresh</button>
 </div>
 <div id="people">Loading...</div>
 </section>
 
+<section id="reels" class="hidden">
+<div class="section-title">🎬 Reels</div>
+<div id="reelsList" class="reels-container">Loading...</div>
+</section>
+
+<section id="activity" class="hidden">
+<div class="section-title">♡ Activity</div>
+<div class="card">
+<h3>Notifications</h3>
+<p class="small">तुम्हारी Posts पर Likes और नए Followers यहाँ दिखेंगे।</p>
+</div>
+<div id="activityList">Loading...</div>
+</section>
+
 <section id="profile" class="hidden">
 <div class="card">
-<h3>👤 Your Profile</h3>
-<img id="avatar" class="avatar" alt="Profile Photo">
+<div class="profile-top">
+<img id="avatar" class="avatar" src="https://placehold.co/100x100?text=User" alt="Profile">
+<div>
+<b id="profileName">Your Profile</b>
+<p id="profileUsername" class="small"></p>
+</div>
+</div>
+<div class="stats">
+<div><b id="myPostsCount">0</b><span class="small">Posts</span></div>
+<div><b id="myFollowers">0</b><span class="small">Followers</span></div>
+<div><b id="myFollowing">0</b><span class="small">Following</span></div>
+</div>
+<p id="profileBio"></p>
+<button class="full secondary" onclick="editProfile()">Edit Profile</button>
+<button class="full secondary" onclick="logout()">Logout</button>
+</div>
+
+<div id="editBox" class="card hidden">
+<h3>Edit Profile</h3>
+<img id="avatarPreview" class="avatar" src="https://placehold.co/100x100?text=User" alt="Profile preview">
 <input id="avatarFile" type="file" accept="image/*">
-<p class="small">Gallery से Profile Photo चुनो। अधिकतम 5 MB।</p>
 <input id="fullName" placeholder="Your Name">
 <input id="username" placeholder="Username">
 <textarea id="bio" placeholder="Your Bio"></textarea>
 <button class="full" onclick="saveProfile()">Save Profile</button>
-<p id="profileStatus"></p>
-<div class="stats">
-<div><b id="myFollowers">0</b><span class="small">Followers</span></div>
-<div><b id="myFollowing">0</b><span class="small">Following</span></div>
+<p id="profileStatus" class="small"></p>
 </div>
-</div>
+<div class="section-title">Posts</div>
+<div id="myPosts" class="profile-grid"></div>
 </section>
 
 <section id="publicProfile" class="hidden">
 <div class="card">
 <button class="secondary" onclick="showTab('discover')">← Back</button>
-<h3>👤 User Profile</h3>
 <div class="public-head">
-<img id="publicAvatar" class="avatar" alt="Profile Photo">
+<img id="publicAvatar" class="avatar" src="https://placehold.co/100x100?text=User" alt="Profile">
 <div>
 <h3 id="publicName"></h3>
 <p id="publicUsername" class="small"></p>
@@ -120,58 +192,65 @@ nav button{background:transparent;color:#7026bb;font-size:19px;padding:8px}
 </div>
 <p id="publicBio"></p>
 <div class="stats">
+<div><b id="publicPostsCount">0</b><span class="small">Posts</span></div>
 <div><b id="publicFollowers">0</b><span class="small">Followers</span></div>
 <div><b id="publicFollowing">0</b><span class="small">Following</span></div>
 </div>
-<button id="publicFollowBtn" class="full hidden">Follow</button>
+<button id="publicFollowBtn" class="full hidden"></button>
 </div>
-<h3>💜 Posts</h3>
-<div id="publicPosts">Loading...</div>
+<div class="section-title">Posts</div>
+<div id="publicPosts" class="profile-grid"></div>
 </section>
+
 </section>
 </main>
 
 <nav id="nav" class="hidden">
-<button onclick="showTab('home')">🏠</button>
-<button onclick="showTab('discover')">🔍</button>
-<button onclick="showTab('home');el('caption').focus()">➕</button>
-<button onclick="showTab('home')">❤️</button>
-<button onclick="showTab('profile')">👤</button>
+<button onclick="showTab('home')">⌂<small>Home</small></button>
+<button onclick="showTab('discover')">⌕<small>Search</small></button>
+<button onclick="showTab('home');setTimeout(()=>el('caption').focus(),100)">⊕<small>Add</small></button>
+<button onclick="showTab('reels')">▣<small>Reels</small></button>
+<button onclick="showTab('activity')">♡<small>Activity</small></button>
+<button onclick="showTab('profile')">☻<small>Profile</small></button>
 </nav>
 
 <script>
 const SUPABASE_URL="https://gxnjbozxxjkfufxpiiiq.supabase.co";
 const SUPABASE_ANON_KEY="sb_publishable_ptKLjPeypXVEmehGDTl_cQ_6ajAxQAV";
 const db=supabase.createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+const BUCKET="Novagram_media";
 
 let currentUser=null;
+let myProfile=null;
 let currentAvatarUrl=null;
 let publicUserId=null;
+let cachedPeople=[];
 
 const el=id=>document.getElementById(id);
-function message(id,text){el(id).textContent=text;}
+function message(id,text){el(id).textContent=text}
+function node(tag,text,cls){
+ const n=document.createElement(tag);
+ if(text!==undefined)n.textContent=text;
+ if(cls)n.className=cls;
+ return n;
+}
 
 async function signup(){
  const email=el('email').value.trim();
  const password=el('password').value;
- if(!email||password.length<6){
-  message('authStatus','सही Email और कम से कम 6 अक्षर का Password डालो।');
-  return;
- }
+ if(!email||password.length<6)return message('authStatus','सही Email और कम से कम 6 अक्षर का Password डालो।');
  const {data,error}=await db.auth.signUp({email,password});
- if(error){message('authStatus',error.message);return;}
- message('authStatus','Account बन गया! Email verification माँगी जाए तो Email verify करो।');
+ if(error)return message('authStatus',error.message);
+ message('authStatus','Account बन गया। Email verification माँगी जाए तो Email verify करो।');
  if(data.session)await startApp();
 }
-
 async function login(){
  const email=el('email').value.trim();
  const password=el('password').value;
  const {error}=await db.auth.signInWithPassword({email,password});
- if(error){message('authStatus',error.message);return;}
+ if(error)return message('authStatus',error.message);
  await startApp();
 }
-
 async function logout(){
  await db.auth.signOut();
  location.reload();
@@ -184,509 +263,459 @@ async function startApp(){
  el('auth').classList.add('hidden');
  el('app').classList.remove('hidden');
  el('nav').classList.remove('hidden');
- el('welcome').textContent='💜 '+(currentUser.email||'Novagram User');
  await loadProfile();
- await loadFeed();
  await loadStats();
+ showTab('home');
 }
 
 function showTab(tab){
- ['home','discover','profile','publicProfile'].forEach(x=>{
+ ['home','discover','reels','activity','profile','publicProfile'].forEach(x=>{
   el(x).classList.toggle('hidden',x!==tab);
  });
  if(tab==='home')loadFeed();
  if(tab==='discover')loadPeople();
- if(tab==='profile')loadStats();
+ if(tab==='reels')loadReels();
+ if(tab==='activity')loadActivity();
+ if(tab==='profile')loadMyProfile();
 }
 
 async function loadProfile(){
- const {data,error}=await db.from('profiles')
-  .select('*').eq('id',currentUser.id).maybeSingle();
- if(error){message('profileStatus',error.message);return;}
- if(data){
-  el('fullName').value=data.full_name||'';
-  el('username').value=data.username||'';
-  el('bio').value=data.bio||'';
-  currentAvatarUrl=data.avatar_url||null;
-  if(currentAvatarUrl)el('avatar').src=currentAvatarUrl;
+ const {data,error}=await db.from('profiles').select('*').eq('id',currentUser.id).maybeSingle();
+ if(error){console.log(error);return}
+ if(data)myProfile=data;
+ else{
+  const fresh={
+   id:currentUser.id,
+   full_name:'Novagram User',
+   username:'user'+currentUser.id.slice(0,6),
+   bio:'Welcome to Novagram 💜'
+  };
+  const {data:created,error:createError}=await db.from('profiles').upsert(fresh).select().maybeSingle();
+  if(createError){console.log(createError);myProfile=fresh}
+  else myProfile=created||fresh;
  }
+ currentAvatarUrl=myProfile?.avatar_url||null;
+}
+
+function editProfile(){
+ el('editBox').classList.toggle('hidden');
+ el('fullName').value=myProfile?.full_name||'';
+ el('username').value=myProfile?.username||'';
+ el('bio').value=myProfile?.bio||'';
+ el('avatarPreview').src=currentAvatarUrl||'https://placehold.co/100x100?text=User';
 }
 
 el('avatarFile').addEventListener('change',function(){
- const file=this.files[0];
- if(!file)return;
- if(!file.type.startsWith('image/')){
-  message('profileStatus','सिर्फ फोटो चुनें।');this.value='';return;
- }
- if(file.size>5*1024*1024){
-  message('profileStatus','फोटो 5 MB से छोटी होनी चाहिए।');this.value='';return;
- }
- el('avatar').src=URL.createObjectURL(file);
+ const file=this.files[0];if(!file)return;
+ if(!file.type.startsWith('image/')){message('profileStatus','सिर्फ फोटो चुनें।');this.value='';return}
+ if(file.size>5*1024*1024){message('profileStatus','फोटो 5 MB से छोटी होनी चाहिए।');this.value='';return}
+ el('avatarPreview').src=URL.createObjectURL(file);
 });
 
+async function uploadFile(file){
+ const safeName=file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
+ const path=currentUser.id+'/'+Date.now()+'_'+safeName;
+ const {error}=await db.storage.from(BUCKET).upload(path,file);
+ if(error)throw error;
+ return db.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
+}
+
 async function saveProfile(){
- const file=el('avatarFile').files[0];
- if(file){
-  message('profileStatus','फोटो Upload हो रही है...');
-  const ext=file.name.split('.').pop().replace(/[^a-zA-Z0-9]/g,'')||'jpg';
-  const path=currentUser.id+'/avatar_'+Date.now()+'.'+ext;
-  const {error:uploadError}=await db.storage.from('Novagram_media').upload(path,file);
-  if(uploadError){message('profileStatus',uploadError.message);return;}
-  currentAvatarUrl=db.storage.from('Novagram_media').getPublicUrl(path).data.publicUrl;
- }
- const {error}=await db.from('profiles').upsert({
-  id:currentUser.id,
-  full_name:el('fullName').value.trim(),
-  username:el('username').value.trim()||null,
-  bio:el('bio').value.trim(),
-  avatar_url:currentAvatarUrl
- });
- if(error){message('profileStatus',error.message);return;}
- el('avatarFile').value='';
- message('profileStatus','Profile Save हो गई 💜');
- await loadStats();
+ try{
+  let avatar=currentAvatarUrl;
+  const file=el('avatarFile').files[0];
+  if(file)avatar=await uploadFile(file);
+  const updates={
+   id:currentUser.id,
+   full_name:el('fullName').value.trim(),
+   username:el('username').value.trim()||null,
+   bio:el('bio').value.trim(),
+   avatar_url:avatar
+  };
+  const {data,error}=await db.from('profiles').upsert(updates).select().single();
+  if(error)throw error;
+  myProfile=data;
+  currentAvatarUrl=avatar;
+  el('avatarFile').value='';
+  message('profileStatus','Profile Save हो गई 💜');
+  await loadMyProfile();
+ }catch(e){message('profileStatus',e.message)}
 }
 
 async function loadStats(){
- const {count:f,error:e1}=await db.from('follows')
-  .select('*',{count:'exact',head:true}).eq('following_id',currentUser.id);
- const {count:g,error:e2}=await db.from('follows')
-  .select('*',{count:'exact',head:true}).eq('follower_id',currentUser.id);
- if(e1||e2){message('profileStatus',(e1||e2).message);return;}
- el('myFollowers').textContent=f??0;
- el('myFollowing').textContent=g??0;
+ const [{count:posts,error:e1},{count:followers,error:e2},{count:following,error:e3}]=await Promise.all([
+  db.from('posts').select('*',{count:'exact',head:true}).eq('user_id',currentUser.id),
+  db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',currentUser.id),
+  db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',currentUser.id)
+ ]);
+ if(e1||e2||e3){console.log(e1||e2||e3);return}
+ el('myPostsCount').textContent=posts||0;
+ el('myFollowers').textContent=followers||0;
+ el('myFollowing').textContent=following||0;
+}
+
+async function loadMyProfile(){
+ await loadStats();
+ el('profileName').textContent=myProfile?.full_name||'Novagram User';
+ el('profileUsername').textContent='@'+(myProfile?.username||'user');
+ el('profileBio').textContent=myProfile?.bio||'';
+ el('avatar').src=currentAvatarUrl||'https://placehold.co/100x100?text=User';
+ el('storyAvatar').src=currentAvatarUrl||'https://placehold.co/100x100?text=+';
+ const {data,error}=await db.from('posts').select('*').eq('user_id',currentUser.id).order('created_at',{ascending:false});
+ if(error){el('myPosts').textContent=error.message;return}
+ renderGrid('myPosts',data||[]);
 }
 
 async function publish(){
  const file=el('media').files[0];
  const caption=el('caption').value.trim();
+ const selectedType=el('postType').value;
  const status=el('uploadStatus');
- if(!file&&!caption){status.textContent='पहले Text या Photo/Video चुनो।';return;}
- if(file&&file.size>50*1024*1024){status.textContent='फाइल 50 MB से बड़ी है।';return;}
- let url=null,type='text';
- if(file){
-  if(!file.type.startsWith('image/')&&!file.type.startsWith('video/')){
-   status.textContent='सिर्फ फोटो या वीडियो चुनो।';return;
+ if(!file&&!caption)return message('uploadStatus','पहले Text या Photo/Video चुनो।');
+ if(file&&file.size>50*1024*1024)return message('uploadStatus','फाइल 50 MB से बड़ी है।');
+ if(file&&selectedType==='image'&&!file.type.startsWith('image/'))return message('uploadStatus','Photo Post के लिए फोटो चुनो।');
+ if(file&&selectedType==='reel'&&!file.type.startsWith('video/'))return message('uploadStatus','Reel के लिए वीडियो चुनो।');
+ try{
+  let url=null,type='text';
+  if(file){
+   type=selectedType;
+   status.textContent='Uploading...';
+   url=await uploadFile(file);
   }
-  type=file.type.startsWith('video/')?'reel':'image';
-  const path=currentUser.id+'/'+Date.now()+'_'+file.name.replace(/[^a-zA-Z0-9._-]/g,'_');
-  status.textContent='Uploading...';
-  const {error}=await db.storage.from('Novagram_media').upload(path,file);
-  if(error){status.textContent=error.message;return;}
-  url=db.storage.from('Novagram_media').getPublicUrl(path).data.publicUrl;
- }
- const {error}=await db.from('posts').insert({
-  user_id:currentUser.id,caption:caption,media_url:url,media_type:type
- });
- if(error){status.textContent=error.message;return;}
- el('caption').value='';
- el('media').value='';
- status.textContent='Post Published 💜';
- await loadFeed();
+  const {error}=await db.from('posts').insert({
+   user_id:currentUser.id,caption,media_url:url,media_type:type
+  });
+  if(error)throw error;
+  el('caption').value='';
+  el('media').value='';
+  status.textContent='Published 💜';
+  showTab(type==='reel'?'reels':'home');
+ }catch(e){status.textContent=e.message}
 }
 
-/* DELETE POST */
 async function deletePost(post){
- if(!confirm('क्या तुम सच में यह पोस्ट डिलीट करना चाहते हो?'))return;
-
- const {error}=await db.from('posts')
-  .delete()
-  .eq('id',post.id)
-  .eq('user_id',currentUser.id);
-
- if(error){
-  alert('Delete Error: '+error.message);
-  return;
- }
-
- alert('पोस्ट डिलीट हो गई 💜');
- await loadFeed();
+ if(!confirm('क्या यह पोस्ट Delete करनी है?'))return;
+ const {error}=await db.from('posts').delete().eq('id',post.id).eq('user_id',currentUser.id);
+ if(error){alert('Delete Error: '+error.message);return}
+ alert('Post delete हो गई 💜');
+ showTab('home');
 }
 
-/* Feed */
+async function getProfiles(ids){
+ if(!ids.length)return {};
+ const {data,error}=await db.from('profiles').select('id,username,full_name,avatar_url').in('id',ids);
+ if(error)throw error;
+ const map={};
+ (data||[]).forEach(p=>map[p.id]=p);
+ return map;
+}
+
 async function loadFeed(){
  const feed=el('feed');
  feed.textContent='Loading...';
- const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false});
- if(error){feed.textContent=error.message;return;}
- feed.innerHTML='';
- if(!posts||!posts.length){feed.textContent='अभी कोई पोस्ट नहीं है। पहली पोस्ट तुम करो!';return;}
-
- const postIds=posts.map(p=>p.id);
- const userIds=[...new Set(posts.map(p=>p.user_id))];
-
- const [{data:allLikes,error:likesError},{data:profiles,error:profileError},{data:myFollows,error:followError}]=await Promise.all([
-  db.from('likes').select('post_id,user_id').in('post_id',postIds),
-  db.from('profiles').select('id,username,full_name,avatar_url').in('id',userIds),
-  db.from('follows').select('following_id').eq('follower_id',currentUser.id)
- ]);
-
- if(likesError){feed.textContent='Likes Error: '+likesError.message;return;}
- if(profileError){feed.textContent='Profile Error: '+profileError.message;return;}
- if(followError){feed.textContent='Follow Error: '+followError.message;return;}
-
- const likes=allLikes||[];
- const profileMap={};
- (profiles||[]).forEach(p=>profileMap[p.id]=p);
- const following=new Set((myFollows||[]).map(x=>x.following_id));
-
- for(const p of posts){
-  const card=document.createElement('div');
-  card.className='card post';
-
-  const author=profileMap[p.user_id]||{};
-  const header=document.createElement('div');
-  header.className='post-header';
-
-  const avatar=document.createElement('img');
-  avatar.className='post-avatar clickable';
-  avatar.alt='Profile';
-  avatar.src=author.avatar_url||'https://placehold.co/100x100?text=User';
-  avatar.onclick=()=>openPublicProfile(p.user_id);
-
-  const user=document.createElement('div');
-  user.className='post-user clickable';
-  const name=document.createElement('b');
-  name.textContent=author.full_name||author.username||'Novagram User';
-  const username=document.createElement('span');
-  username.textContent='@'+(author.username||'user');
-  user.append(name,username);
-  user.onclick=()=>openPublicProfile(p.user_id);
-  header.append(avatar,user);
-
-  if(p.user_id!==currentUser.id){
-   const follow=document.createElement('button');
-   const isFollowing=following.has(p.user_id);
-   follow.className='follow-btn'+(isFollowing?' secondary':'');
-   follow.textContent=isFollowing?'Following':'Follow';
-   follow.onclick=async()=>{
-    follow.disabled=true;
-    await toggleFollow(p.user_id,follow);
-    if(follow.textContent==='Following')following.add(p.user_id);
-    else following.delete(p.user_id);
-    follow.disabled=false;
-   };
-   header.appendChild(follow);
-  }
-
-  card.appendChild(header);
-
-  const caption=document.createElement('p');
-  caption.textContent=p.caption||'';
-  card.appendChild(caption);
-
-  if(p.media_url){
-   const media=document.createElement(p.media_type==='image'?'img':'video');
-   media.src=p.media_url;
-   if(media.tagName==='VIDEO'){
-    media.controls=true;
-    media.playsInline=true;
+ const {data:posts,error}=await db.from('posts').select('*').order('created_at',{ascending:false}).limit(50);
+ if(error){feed.textContent=error.message;return}
+ feed.replaceChildren();
+ if(!posts?.length){feed.textContent='अभी कोई Post नहीं है। पहली Post तुम करो 💜';return}
+ try{
+  const ids=[...new Set(posts.map(p=>p.user_id))];
+  const profiles=await getProfiles(ids);
+  const postIds=posts.map(p=>p.id);
+  const [{data:likes,error:le},{data:follows,error:fe}]=await Promise.all([
+   db.from('likes').select('post_id,user_id').in('post_id',postIds),
+   db.from('follows').select('following_id').eq('follower_id',currentUser.id)
+  ]);
+  if(le||fe)throw le||fe;
+  const following=new Set((follows||[]).map(x=>x.following_id));
+  for(const p of posts){
+   const card=node('article',undefined,'post');
+   const profile=profiles[p.user_id]||{};
+   const head=node('div',undefined,'post-header');
+   const avatar=node('img',undefined,'avatar');
+   avatar.src=profile.avatar_url||'https://placehold.co/100x100?text=User';
+   avatar.onclick=()=>openPublicProfile(p.user_id);
+   const user=node('div',undefined,'post-user');
+   const name=node('b',profile.full_name||'Novagram User');
+   const handle=node('span','@'+(profile.username||'user'));
+   user.append(name,handle);
+   user.onclick=()=>openPublicProfile(p.user_id);
+   head.append(avatar,user);
+   if(p.user_id!==currentUser.id){
+    const follow=node('button',following.has(p.user_id)?'Following':'Follow','secondary');
+    follow.onclick=async()=>{
+     follow.disabled=true;
+     await toggleFollow(p.user_id,follow);
+     follow.disabled=false;
+    };
+    head.append(follow);
    }
-   card.appendChild(media);
+   card.append(head);
+   if(p.media_url){
+    const media=node(p.media_type==='image'?'img':'video');
+    media.className='post-media';
+    media.src=p.media_url;
+    if(media.tagName==='VIDEO'){media.controls=true;media.playsInline=true}
+    card.append(media);
+   }
+   if(p.caption)card.append(node('p',p.caption,'post-caption'));
+   const date=node('div',new Date(p.created_at).toLocaleString(),'small post-date');
+   card.append(date);
+   const postLikes=(likes||[]).filter(x=>x.post_id===p.id);
+   const liked=postLikes.some(x=>x.user_id===currentUser.id);
+   const actions=node('div',undefined,'post-actions');
+   const like=node('button',(liked?'♥ Liked':'♡ Like')+' ('+postLikes.length+')',liked?'like-active':'secondary');
+   like.dataset.liked=liked?'true':'false';
+   like.dataset.count=postLikes.length;
+   like.onclick=()=>likePost(p.id,like);
+   const comment=node('button','Comment','secondary');
+   comment.onclick=()=>commentPost(p.id);
+   const share=node('button','Share','secondary');
+   share.onclick=()=>sharePost(p);
+   actions.append(like,comment,share);
+   if(p.user_id===currentUser.id){
+    const del=node('button','Delete','danger');
+    del.onclick=()=>deletePost(p);
+    actions.append(del);
+   }
+   card.append(actions);
+   const commentArea=node('div',undefined,'small');
+   commentArea.style.padding='0 12px 12px';
+   commentArea.textContent='Comments loading...';
+   card.append(commentArea);
+   feed.append(card);
+   loadComments(p.id,commentArea);
   }
-
-  const date=document.createElement('p');
-  date.className='small';
-  date.textContent=new Date(p.created_at).toLocaleString();
-  card.appendChild(date);
-
-  const postLikes=likes.filter(x=>x.post_id===p.id);
-  const liked=postLikes.some(x=>x.user_id===currentUser.id);
-  const actions=document.createElement('div');
-  actions.className='post-actions';
-
-  const like=document.createElement('button');
-  like.dataset.liked=liked?'true':'false';
-  like.dataset.count=postLikes.length;
-  like.textContent=(liked?'❤️ Liked':'❤️ Like')+' ('+postLikes.length+')';
-  if(liked)like.classList.add('like-active');
-  like.onclick=()=>likePost(p.id,like);
-
-  const comment=document.createElement('button');
-  comment.textContent='💬 Comment';
-  comment.onclick=()=>commentPost(p.id);
-
-  const share=document.createElement('button');
-  share.textContent='📤 Share';
-  share.onclick=()=>sharePost(p);
-
-  actions.append(like,comment,share);
-
-  /* केवल अपनी पोस्ट पर Delete बटन */
-  if(p.user_id===currentUser.id){
-   const del=document.createElement('button');
-   del.textContent='🗑️ Delete';
-   del.className='danger';
-   del.onclick=()=>deletePost(p);
-   actions.appendChild(del);
-  }
-
-  card.appendChild(actions);
-
-  const comments=document.createElement('div');
-  comments.className='small';
-  comments.textContent='Comments loading...';
-  card.appendChild(comments);
-  feed.appendChild(card);
-  loadComments(p.id,comments);
- }
+ }catch(e){feed.textContent=e.message}
 }
 
 async function likePost(id,button){
  if(button.disabled)return;
  button.disabled=true;
- const wasLiked=button.dataset.liked==='true';
- let result;
-
- if(wasLiked){
-  result=await db.from('likes').delete().eq('post_id',id).eq('user_id',currentUser.id);
- }else{
-  result=await db.from('likes').insert({post_id:id,user_id:currentUser.id});
- }
-
- if(result.error){
-  alert('Like Error: '+result.error.message);
-  button.disabled=false;
-  return;
- }
-
- let count=parseInt(button.dataset.count||'0',10);
- count=wasLiked?Math.max(0,count-1):count+1;
- button.dataset.count=String(count);
- button.dataset.liked=wasLiked?'false':'true';
- button.textContent=(wasLiked?'❤️ Like':'❤️ Liked')+' ('+count+')';
- button.classList.toggle('like-active',!wasLiked);
+ const liked=button.dataset.liked==='true';
+ const result=liked
+  ?await db.from('likes').delete().eq('post_id',id).eq('user_id',currentUser.id)
+  :await db.from('likes').insert({post_id:id,user_id:currentUser.id});
+ if(result.error){alert('Like Error: '+result.error.message);button.disabled=false;return}
+ let count=Number(button.dataset.count||0)+(liked?-1:1);
+ button.dataset.count=count;
+ button.dataset.liked=liked?'false':'true';
+ button.textContent=(liked?'♡ Like':'♥ Liked')+' ('+count+')';
+ button.className=liked?'secondary':'like-active';
  button.disabled=false;
 }
 
 async function commentPost(id){
  const value=prompt('अपना Comment लिखो');
- if(!value||!value.trim())return;
- const {error}=await db.from('comments').insert({
-  post_id:id,user_id:currentUser.id,comment:value.trim()
- });
- if(error)alert(error.message);
+ if(!value?.trim())return;
+ const {error}=await db.from('comments').insert({post_id:id,user_id:currentUser.id,comment:value.trim()});
+ if(error)alert('Comment Error: '+error.message);
  else loadFeed();
 }
 
-async function loadComments(id,container){
- const {data,error}=await db.from('comments').select('comment').eq('post_id',id).order('created_at');
- if(error){container.textContent='Comments unavailable';return;}
- container.textContent=data&&data.length?data.map(x=>'💬 '+x.comment).join(' | '):'No comments yet';
+async function loadComments(id,box){
+ const {data,error}=await db.from('comments').select('comment').eq('post_id',id).order('created_at',{ascending:true});
+ if(error){box.textContent='Comments unavailable';return}
+ box.textContent=data?.length?data.map(x=>'💬 '+x.comment).join('  •  '):'No comments yet';
 }
 
 async function sharePost(post){
  const url=post.media_url||location.href;
  if(navigator.share){
-  try{await navigator.share({title:'Novagram 💜',text:post.caption||'Novagram Post',url:url});}catch(e){}
+  try{await navigator.share({title:'Novagram 💜',text:post.caption||'Novagram Post',url})}catch(e){}
  }else{
-  try{
-   await navigator.clipboard.writeText(url);
-   alert('Link copied!');
-  }catch(e){alert(url);}
+  try{await navigator.clipboard.writeText(url);alert('Link copied!')}catch(e){alert(url)}
  }
 }
 
-/* Discover People */
+async function loadReels(){
+ const box=el('reelsList');
+ box.replaceChildren();
+ box.textContent='Loading Reels...';
+ const {data:posts,error}=await db.from('posts').select('*').eq('media_type','reel').order('created_at',{ascending:false}).limit(50);
+ if(error){box.textContent=error.message;return}
+ box.replaceChildren();
+ if(!posts?.length){box.textContent='अभी कोई Reel नहीं है। Home में जाकर Reel चुनकर वीडियो Upload करो 💜';return}
+ let profiles={};
+ try{profiles=await getProfiles([...new Set(posts.map(p=>p.user_id))])}catch(e){box.textContent=e.message;return}
+ for(const p of posts){
+  const card=node('div',undefined,'reel');
+  const video=node('video');
+  video.src=p.media_url;
+  video.controls=true;
+  video.playsInline=true;
+  video.loop=true;
+  video.preload='metadata';
+  const info=node('div',undefined,'reel-info');
+  const profile=profiles[p.user_id]||{};
+  info.append(node('b','@'+(profile.username||'user')));
+  info.append(node('p',p.caption||''));
+  const like=node('button','♡ Like');
+  like.onclick=async()=>{
+   const {data}=await db.from('likes').select('post_id').eq('post_id',p.id).eq('user_id',currentUser.id).maybeSingle();
+   if(data){
+    const {error}=await db.from('likes').delete().eq('post_id',p.id).eq('user_id',currentUser.id);
+    if(!error)like.textContent='♡ Like';
+    else alert(error.message);
+   }else{
+    const {error}=await db.from('likes').insert({post_id:p.id,user_id:currentUser.id});
+    if(!error)like.textContent='♥ Liked';
+    else alert(error.message);
+   }
+  };
+  const comment=node('button','Comment');
+  comment.onclick=()=>commentPost(p.id);
+  info.append(like,comment);
+  if(p.user_id===currentUser.id){
+   const del=node('button','Delete');
+   del.onclick=()=>deletePost(p);
+   info.append(del);
+  }
+  card.append(video,info);
+  box.append(card);
+ }
+ const observer=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{
+   const v=entry.target;
+   if(entry.isIntersecting)v.play().catch(()=>{});
+   else v.pause();
+  });
+ },{threshold:.7});
+ box.querySelectorAll('video').forEach(v=>observer.observe(v));
+}
+
+/* Search and Discover */
 async function loadPeople(){
  const box=el('people');
- box.textContent='लोगों को खोज रहे हैं...';
- const {data:profiles,error}=await db.from('profiles')
-  .select('id,username,full_name,bio,avatar_url').neq('id',currentUser.id);
-
- if(error){box.textContent='People Error: '+error.message;return;}
- if(!profiles||!profiles.length){
-  box.textContent='अभी कोई दूसरा Profile नहीं मिला। दूसरे यूज़र को Account बनाकर Profile Save करना होगा.';
-  return;
- }
-
- const {data:follows,error:followError}=await db.from('follows')
-  .select('following_id').eq('follower_id',currentUser.id);
-
- if(followError){box.textContent=followError.message;return;}
- const following=new Set((follows||[]).map(x=>x.following_id));
- box.innerHTML='';
-
- for(const person of profiles){
-  const card=document.createElement('div');
-  card.className='card person';
-
-  const avatar=document.createElement('img');
-  avatar.className='post-avatar clickable';
-  avatar.src=person.avatar_url||'https://placehold.co/100x100?text=User';
-  avatar.onclick=()=>openPublicProfile(person.id);
-
-  const info=document.createElement('div');
-  info.className='person-info clickable';
-
-  const name=document.createElement('b');
-  name.textContent=person.full_name||person.username||'Novagram User';
-
-  const username=document.createElement('p');
-  username.className='small';
-  username.textContent='@'+(person.username||'user');
-
-  const bio=document.createElement('p');
-  bio.className='small';
-  bio.textContent=person.bio||'';
-
-  info.append(name,username,bio);
-  info.onclick=()=>openPublicProfile(person.id);
-
-  const button=document.createElement('button');
-  const isFollowing=following.has(person.id);
-  button.textContent=isFollowing?'Following':'Follow';
-  if(isFollowing)button.className='secondary';
-
-  button.onclick=async()=>{
-   button.disabled=true;
-   await toggleFollow(person.id,button);
-   button.disabled=false;
-  };
-
-  card.append(avatar,info,button);
-  box.appendChild(card);
- }
+ box.textContent='Loading people...';
+ const {data,error}=await db.from('profiles').select('id,username,full_name,bio,avatar_url').neq('id',currentUser.id).limit(100);
+ if(error){box.textContent=error.message;return}
+ cachedPeople=data||[];
+ filterPeople();
+}
+function filterPeople(){
+ const box=el('people');
+ const q=(el('searchInput').value||'').trim().toLowerCase();
+ box.replaceChildren();
+ const matches=cachedPeople.filter(p=>(p.username||'').toLowerCase().includes(q)||(p.full_name||'').toLowerCase().includes(q));
+ if(!matches.length){box.textContent='कोई User नहीं मिला।';return}
+ matches.forEach(p=>{
+  const card=node('div',undefined,'card person');
+  const img=node('img',undefined,'avatar');
+  img.src=p.avatar_url||'https://placehold.co/100x100?text=User';
+  const info=node('div',undefined,'person-info');
+  info.append(node('b',p.full_name||'Novagram User'));
+  info.append(node('p','@'+(p.username||'user'),'small'));
+  info.append(node('p',p.bio||'','small'));
+  info.onclick=()=>openPublicProfile(p.id);
+  const view=node('button','View');
+  view.onclick=()=>openPublicProfile(p.id);
+  card.append(img,info,view);
+  box.append(card);
+ });
 }
 
-async function toggleFollow(personId,button){
- const isFollowing=button.textContent==='Following';
+async function toggleFollow(id,button){
+ const {data:old,error:readError}=await db.from('follows').select('following_id').eq('follower_id',currentUser.id).eq('following_id',id).maybeSingle();
+ if(readError){alert(readError.message);return}
  let result;
-
- if(isFollowing){
-  result=await db.from('follows').delete()
-   .eq('follower_id',currentUser.id).eq('following_id',personId);
- }else{
-  result=await db.from('follows').insert({
-   follower_id:currentUser.id,following_id:personId
-  });
- }
-
- if(result.error){
-  alert('Follow Error: '+result.error.message);
-  return;
- }
-
- button.textContent=isFollowing?'Follow':'Following';
- button.className=isFollowing?'follow-btn':'follow-btn secondary';
+ if(old)result=await db.from('follows').delete().eq('follower_id',currentUser.id).eq('following_id',id);
+ else result=await db.from('follows').insert({follower_id:currentUser.id,following_id:id});
+ if(result.error){alert('Follow Error: '+result.error.message);return}
+ button.textContent=old?'Follow':'Following';
+ button.className=old?'secondary':'';
  await loadStats();
 }
 
-/* Public Profile */
-async function openPublicProfile(userId){
- publicUserId=userId;
+/* Other user profile */
+async function openPublicProfile(id){
+ publicUserId=id;
  showTab('publicProfile');
-
  el('publicName').textContent='Loading...';
- el('publicUsername').textContent='';
- el('publicBio').textContent='';
- el('publicPosts').textContent='Posts लोड हो रही हैं...';
- el('publicFollowBtn').classList.add('hidden');
-
- const {data:person,error}=await db.from('profiles')
-  .select('id,username,full_name,bio,avatar_url')
-  .eq('id',userId).maybeSingle();
-
- if(error){el('publicName').textContent='Profile Error: '+error.message;return;}
- if(!person){el('publicName').textContent='Profile नहीं मिली।';return;}
-
- el('publicName').textContent=person.full_name||person.username||'Novagram User';
- el('publicUsername').textContent='@'+(person.username||'user');
- el('publicBio').textContent=person.bio||'';
- el('publicAvatar').src=person.avatar_url||'https://placehold.co/100x100?text=User';
-
- const [{count:followers,error:e1},{count:following,error:e2}]=await Promise.all([
-  db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',userId),
-  db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',userId)
+ const {data:p,error}=await db.from('profiles').select('*').eq('id',id).maybeSingle();
+ if(error||!p){el('publicName').textContent=error?.message||'Profile नहीं मिली';return}
+ el('publicName').textContent=p.full_name||'Novagram User';
+ el('publicUsername').textContent='@'+(p.username||'user');
+ el('publicBio').textContent=p.bio||'';
+ el('publicAvatar').src=p.avatar_url||'https://placehold.co/100x100?text=User';
+ const [{count:posts},{count:followers},{count:following}]=await Promise.all([
+  db.from('posts').select('*',{count:'exact',head:true}).eq('user_id',id),
+  db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id),
+  db.from('follows').select('*',{count:'exact',head:true}).eq('follower_id',id)
  ]);
-
- if(e1||e2){
-  el('publicPosts').textContent='Stats Error: '+(e1||e2).message;
-  return;
- }
-
- el('publicFollowers').textContent=followers??0;
- el('publicFollowing').textContent=following??0;
-
+ el('publicPostsCount').textContent=posts||0;
+ el('publicFollowers').textContent=followers||0;
+ el('publicFollowing').textContent=following||0;
  const followBtn=el('publicFollowBtn');
-
- if(userId!==currentUser.id){
+ if(id===currentUser.id)followBtn.classList.add('hidden');
+ else{
   followBtn.classList.remove('hidden');
-
-  const {data:relation,error:relationError}=await db.from('follows')
-   .select('following_id').eq('follower_id',currentUser.id)
-   .eq('following_id',userId).maybeSingle();
-
-  if(relationError){
-   el('publicPosts').textContent='Follow status Error: '+relationError.message;
-   return;
-  }
-
+  const {data:relation}=await db.from('follows').select('following_id').eq('follower_id',currentUser.id).eq('following_id',id).maybeSingle();
   followBtn.textContent=relation?'Following':'Follow';
-  followBtn.className='full'+(relation?' secondary':'');
+  followBtn.className='full '+(relation?'secondary':'');
   followBtn.onclick=async()=>{
    followBtn.disabled=true;
-   await toggleFollow(userId,followBtn);
+   await toggleFollow(id,followBtn);
+   const {count}=await db.from('follows').select('*',{count:'exact',head:true}).eq('following_id',id);
+   el('publicFollowers').textContent=count||0;
    followBtn.disabled=false;
-   const {count}=await db.from('follows')
-    .select('*',{count:'exact',head:true}).eq('following_id',userId);
-   el('publicFollowers').textContent=count??0;
   };
  }
+ const {data:items,error:postError}=await db.from('posts').select('*').eq('user_id',id).order('created_at',{ascending:false});
+ if(postError){el('publicPosts').textContent=postError.message;return}
+ renderGrid('publicPosts',items||[]);
+}
 
- const {data:posts,error:postsError}=await db.from('posts')
-  .select('*').eq('user_id',userId).order('created_at',{ascending:false});
+/* Profile grid */
+function renderGrid(id,posts){
+ const box=el(id);
+ box.replaceChildren();
+ if(!posts.length){box.textContent='अभी कोई Post नहीं है।';return}
+ posts.forEach(p=>{
+  if(!p.media_url)return;
+  const m=node(p.media_type==='image'?'img':'video');
+  m.src=p.media_url;
+  if(m.tagName==='VIDEO'){m.muted=true;m.playsInline=true}
+  m.title=p.caption||'Novagram Post';
+  m.onclick=()=>alert(p.caption||'Novagram Post');
+  box.append(m);
+ });
+}
 
- if(postsError){el('publicPosts').textContent='Posts Error: '+postsError.message;return;}
-
- const box=el('publicPosts');
- box.innerHTML='';
-
- if(!posts||!posts.length){
-  box.textContent='अभी कोई Post नहीं है।';
-  return;
+/* Activity: likes on your posts and new followers */
+async function loadActivity(){
+ const box=el('activityList');
+ box.textContent='Loading activity...';
+ const {data:posts,error}=await db.from('posts').select('id,caption').eq('user_id',currentUser.id);
+ if(error){box.textContent=error.message;return}
+ const ids=(posts||[]).map(p=>p.id);
+ let likes=[];
+ if(ids.length){
+  const {data,error:likeError}=await db.from('likes').select('post_id,user_id').in('post_id',ids);
+  if(likeError){box.textContent=likeError.message;return}
+  likes=data||[];
  }
-
- for(const post of posts){
-  const card=document.createElement('div');
-  card.className='card public-post';
-
-  const caption=document.createElement('p');
-  caption.textContent=post.caption||'';
-  card.appendChild(caption);
-
-  if(post.media_url){
-   const media=document.createElement(post.media_type==='image'?'img':'video');
-   media.src=post.media_url;
-   if(media.tagName==='VIDEO'){
-    media.controls=true;
-    media.playsInline=true;
-   }
-   card.appendChild(media);
-  }
-
-  const date=document.createElement('p');
-  date.className='small';
-  date.textContent=new Date(post.created_at).toLocaleString();
-  card.appendChild(date);
-
-  /* अपनी Public Profile में भी Delete */
-  if(post.user_id===currentUser.id){
-   const del=document.createElement('button');
-   del.textContent='🗑️ Delete';
-   del.className='full danger';
-   del.onclick=()=>deletePost(post);
-   card.appendChild(del);
-  }
-
-  box.appendChild(card);
- }
+ const {data:follows,error:followError}=await db.from('follows').select('follower_id').eq('following_id',currentUser.id);
+ if(followError){box.textContent=followError.message;return}
+ const actorIds=[...new Set([...likes.map(x=>x.user_id),...(follows||[]).map(x=>x.follower_id)])];
+ let profiles={};
+ try{profiles=await getProfiles(actorIds)}catch(e){box.textContent=e.message;return}
+ box.replaceChildren();
+ const postMap={};
+ (posts||[]).forEach(p=>postMap[p.id]=p);
+ likes.forEach(l=>{
+  const who=profiles[l.user_id];
+  box.append(node('div','♥ '+(who?.username?'@'+who.username:'Someone')+' liked your post: '+(postMap[l.post_id]?.caption||'Photo / Reel'),'activity-item'));
+ });
+ (follows||[]).forEach(f=>{
+  const who=profiles[f.follower_id];
+  box.append(node('div','＋ '+(who?.username?'@'+who.username:'Someone')+' started following you.','activity-item'));
+ });
+ if(!box.children.length)box.textContent='अभी कोई नई Activity नहीं है।';
 }
 
 db.auth.onAuthStateChange((event,session)=>{
- if(session&&!currentUser)setTimeout(startApp,0);
+ if(session&&!currentUser)setTimeout(()=>startApp(),0);
 });
-
 startApp();
 </script>
 </body>
