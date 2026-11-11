@@ -27,7 +27,7 @@ button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:wh
 nav{position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #ddd;display:flex;justify-content:space-around;padding:9px 2px;z-index:20}
 nav button{background:white;color:#6424a5;font-size:12px;margin:0;padding:6px 2px;flex:1}
 nav span{display:block;font-size:21px;margin-bottom:3px}
-.reel{height:calc(100dvh - 145px);min-height:430px;background:#000;color:white;position:relative;overflow:hidden;margin:8px 0;scroll-snap-align:start}
+.reel{height:calc(100dvh - 145px);min-height:430px;background:#000;color:white;position:relative;overflow:hidden;margin:8px 0;scroll-snap-align:start;border-radius:10px}
 .reel video{width:100%;height:100%;object-fit:contain;background:#000}
 .reel-side{position:absolute;right:9px;bottom:85px;z-index:3;display:flex;flex-direction:column;align-items:center;gap:14px}
 .reel-action{background:#17171766!important;color:white!important;padding:5px!important;font-size:27px!important;text-shadow:0 2px 5px #000;display:flex;flex-direction:column;align-items:center;min-width:48px}
@@ -119,6 +119,12 @@ function safe(t){
  "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
  }[c]));
 }
+function isVideoPost(post){
+ const type=String(post.media_type||"").trim().toLowerCase();
+ const url=String(post.media_url||"").split("?")[0].toLowerCase();
+ return ["reel","video"].includes(type) ||
+        /\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(url);
+}
 function showTab(tab){
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  document.getElementById(tab+"Page").classList.add("active");
@@ -207,10 +213,10 @@ async function getCounts(ids){
  return {likes,comments};
 }
 function mediaHTML(post){
- if(post.media_type==="reel"||post.media_type==="video"){
+ if(isVideoPost(post)){
   return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
  }
- if(post.media_type==="image"){
+ if(String(post.media_type||"").trim().toLowerCase()==="image"){
   return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
  }
  return "";
@@ -247,28 +253,41 @@ async function loadFeed(){
  for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
  box.innerHTML=html;
 }
+
+/* Fixed Reels loader */
 async function loadReels(){
  if(!currentUser)return;
  const box=document.getElementById("reels");
  box.innerHTML="Loading Reels...";
- // Supabase table mein video ka media_type "reel" hai
- const {data,error}=await db.from("posts")
+
+ // Pehle sab posts lao, phir video posts alag chuno
+ const {data:allPosts,error}=await db.from("posts")
  .select("*")
- .eq("media_type","reel")
  .order("created_at",{ascending:false});
- if(error){box.textContent=error.message;return}
- if(!data?.length){
-  box.innerHTML="<p>Abhi koi Reel nahi hai. Add se video upload karo 💜</p>";
+
+ if(error){
+  box.textContent="Reels load nahi hui: "+error.message;
   return;
  }
+
+ const data=(allPosts||[]).filter(isVideoPost);
+
+ if(!data.length){
+  box.innerHTML="<p>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";
+  message("Posts check hui: "+(allPosts||[]).length+" | Video Reels: 0");
+  return;
+ }
+
  const profiles=await getProfiles(data.map(p=>p.user_id));
  const counts=await getCounts(data.map(p=>p.id));
+
  box.innerHTML=data.map(p=>{
   const profile=profiles[p.user_id]||{};
   const liked=(counts.likes[p.id]||[]).includes(currentUser.id);
   const likeCount=(counts.likes[p.id]||[]).length;
   const commentCount=counts.comments[p.id]||0;
   const isSaved=savedPosts.includes(p.id);
+
   return `<article class="reel">
    <video src="${safe(p.media_url)}" autoplay muted loop playsinline controls></video>
    <div class="reel-side">
@@ -287,6 +306,8 @@ async function loadReels(){
    </div>
   </article>`;
  }).join("");
+
+ message("💜 "+data.length+" Reels mil gayi");
 }
 async function toggleLike(postId,isReel=false){
  if(!currentUser)return message("Pehle login karo");
@@ -350,7 +371,6 @@ async function uploadPost(){
  .upload(path,file,{upsert:false});
  if(uploadError)return message(uploadError.message);
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
- // Video ko "reel" naam se save karna hai
  const media_type=file.type.startsWith("video/")?"reel":"image";
  const {error}=await db.from("posts").insert({
   user_id:currentUser.id,
