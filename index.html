@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -8,55 +9,44 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#fff;color:#26202d;font-family:Arial,sans-serif}
-header{background:#fff;color:#7027bd;padding:15px 18px;font-family:cursive;font-size:32px;font-weight:bold;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10;box-shadow:0 2px 8px #00000008}
-.page{display:none;padding:12px 0 90px;background:#fff;color:#26202d}
+header{background:#fff;color:#7027bd;padding:15px 18px;font-family:cursive;font-size:32px;font-weight:bold;border-bottom:1px solid #eee;position:sticky;top:0;z-index:10}
+.page{display:none;padding:12px 0 90px}
 .page.active{display:block}
 .page h2{padding:0 14px;color:#28133f}
 input,textarea{width:100%;padding:13px;margin:7px 0;border:1px solid #e5d9f2;border-radius:12px;font-size:15px;background:#faf8ff;color:#291344}
-input::placeholder,textarea::placeholder{color:#988ba5}
-button{border:0;border-radius:12px;padding:10px 14px;background:#7027bd;color:white;font-size:14px;cursor:pointer;margin:3px}
-button:disabled{opacity:.6}
-.card,.user-card,.notification-card{background:#fff;color:#241532;border-radius:14px;box-shadow:0 2px 12px #6020a510;border:1px solid #f0e8f8;margin:10px 12px;padding:12px}
-.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+button{border:0;border-radius:10px;padding:10px 14px;background:#7027bd;color:white;font-size:14px;cursor:pointer;margin:3px}
+button:disabled{opacity:.5}
+.card,.user-card,.notification-card{background:#fff;border:1px solid #f0e8f8;margin:10px 12px;padding:12px;border-radius:12px}
+.post-card{background:#fff;margin:12px 0 18px;border-top:1px solid #eee;border-bottom:1px solid #eee;padding:0 0 10px}
+.post-head{display:flex;align-items:center;gap:10px;padding:10px 12px}
 .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#eee;border:2px solid #a855f7}
-.profile-photo{width:100px;height:100px;border-radius:50%;object-fit:cover;border:3px solid #782bc4;display:block;margin:10px auto;cursor:pointer}
-.post-media{width:100%;max-width:100%;margin:0;max-height:620px;height:auto;object-fit:cover;background:#f5f0ff;border-radius:12px}
-.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;border-top:1px solid #f0e8f8;padding-top:7px}
-.actions button{background:transparent;color:#352044;font-size:14px;padding:8px 5px;margin:0}
-.actions button.liked{color:#ed286b}
+.user-name{cursor:pointer;color:#7027bd}
+.post-media{width:100%;max-height:650px;display:block;object-fit:contain;background:#111}
+.post-caption{padding:8px 12px;margin:0;line-height:1.5;overflow-wrap:anywhere}
+.post-date{padding:0 12px;color:#999;font-size:12px}
+.post-actions{display:flex;align-items:center;gap:18px;padding:7px 12px}
+.post-actions button{background:transparent;color:#30213b;padding:5px 0;margin:0;font-size:23px}
+.post-actions button.liked{color:#ed286b}
+.post-actions .save-action{margin-left:auto}
+.post-likes{padding:0 12px;font-size:14px;font-weight:bold}
+.post-menu{margin-left:auto;background:transparent;color:#555;font-size:22px;padding:3px}
 .muted{color:#8b8194;font-size:13px}
 .hidden{display:none!important}
 #status{padding:8px 12px;color:#7027bd;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:7px 2px calc(7px + env(safe-area-inset-bottom));z-index:20;box-shadow:0 -3px 12px #00000008}
-nav button{background:#fff;color:#5b4b68;font-size:11px;margin:0;padding:5px 1px;flex:1;border-radius:10px}
+nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;padding:7px 2px calc(7px + env(safe-area-inset-bottom));z-index:20}
+nav button{background:#fff;color:#5b4b68;font-size:11px;margin:0;padding:5px 1px;flex:1}
 nav span{display:block;font-size:25px;margin-bottom:3px;color:#7027bd}
 .follow-btn{background:#7027bd;color:white}
 .follow-btn.following{background:#f0eaf6;color:#7027bd;border:1px solid #d8c5eb}
-.profile-stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0;color:#352044}
-.profile-stats b{display:block;font-size:19px;color:#241532}
-.profile-stat-btn{background:transparent!important;color:#352044!important;margin:0;padding:5px;display:flex;flex-direction:column;align-items:center}
-.user-card{border-radius:14px;margin:12px;padding:13px}
-.user-card .post-head{margin:0}
-.user-name{cursor:pointer;color:#7027bd}
-.back-btn{background:#eee8f5;color:#51227c}
-.profile-top{display:flex;justify-content:space-between;align-items:center;position:relative;padding:0 12px}
+.profile-top{display:flex;justify-content:space-between;align-items:center;padding:0 12px}
 .profile-top h2{margin:8px 0}
 .menu-wrap{position:relative}
 .menu-btn{background:#f3eafa;color:#7027bd;font-size:25px;padding:5px 14px}
-.profile-menu{position:absolute;right:0;top:43px;z-index:50;background:white;border:1px solid #eee;box-shadow:0 3px 16px #0002;border-radius:12px;padding:7px;min-width:180px}
+.profile-menu{position:absolute;right:0;top:43px;z-index:50;background:white;border:1px solid #eee;border-radius:12px;padding:7px;min-width:180px;box-shadow:0 3px 16px #0002}
 .profile-menu button{display:block;width:100%;text-align:left;background:white;color:#352044;padding:12px;margin:0}
-.profile-menu button:hover{background:#f7f1fc}
-#followList{margin-top:15px}
-.follow-list-head{display:flex;justify-content:space-between;align-items:center}
-.follow-list-head h3{margin:5px}
-.user-list-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#faf8ff;border:1px solid #eee5f7;border-radius:12px;padding:10px;margin:8px 0}
-.user-list-info{display:flex;align-items:center;gap:9px;min-width:0}
-.user-list-info div{min-width:0;overflow-wrap:anywhere}
-
-/* Instagram style profile */
 .ig-profile{margin:0 12px;padding:14px 4px 10px}
 .ig-profile-top{display:flex;align-items:center;gap:22px;padding:8px 4px}
-.ig-profile-photo{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #a855f7;padding:2px;flex-shrink:0;cursor:pointer}
+.ig-profile-photo{width:88px;height:88px;border-radius:50%;object-fit:cover;border:3px solid #a855f7;padding:2px;flex-shrink:0}
 .ig-profile-info{flex:1;min-width:0}
 .ig-profile-username{font-size:20px;font-weight:bold;color:#28133f;overflow-wrap:anywhere}
 .ig-stats{display:flex;justify-content:space-around;text-align:center;padding:14px 0;border-top:1px solid #f0e8f8;border-bottom:1px solid #f0e8f8;margin-top:12px}
@@ -67,78 +57,67 @@ nav span{display:block;font-size:25px;margin-bottom:3px;color:#7027bd}
 .ig-buttons{display:flex;gap:8px;padding:0 4px 12px}
 .ig-buttons button{flex:1;margin:0;padding:11px 5px;font-weight:bold}
 .ig-edit{background:#f1e8fa;color:#7027bd}
-.ig-share{background:#7027bd;color:white}
+.ig-share{background:#7027bd}
 .ig-tabs{display:flex;border-top:1px solid #eee;margin-top:5px}
 .ig-tabs button{flex:1;background:white;color:#7027bd;border-radius:0;margin:0;padding:12px;font-size:20px}
 .ig-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:2px;margin-top:2px}
-.ig-grid-item{position:relative;aspect-ratio:1/1;background:#f2eafa;overflow:hidden;cursor:pointer}
+.ig-grid-item{position:relative;aspect-ratio:1;background:#f2eafa;overflow:hidden;cursor:pointer}
 .ig-grid-item img,.ig-grid-item video{width:100%;height:100%;object-fit:cover;display:block}
 .ig-grid-empty{grid-column:1/-1;text-align:center;padding:40px 12px;color:#8b8194}
-.ig-grid-video{position:absolute;right:7px;top:7px;color:white;text-shadow:0 1px 5px #000;font-size:18px}
+.ig-grid-video{position:absolute;right:7px;top:7px;color:white;text-shadow:0 1px 5px #000}
 .ig-edit-area{margin:10px 12px;padding:12px;background:#faf8ff;border:1px solid #eee5f7;border-radius:14px}
-.ig-edit-area h3{color:#7027bd}
+#followList,#otherFollowList{margin-top:15px}
+.follow-list-head{display:flex;justify-content:space-between;align-items:center}
+.user-list-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#faf8ff;border:1px solid #eee5f7;border-radius:12px;padding:10px;margin:8px 0}
+.user-list-info{display:flex;align-items:center;gap:9px;min-width:0}
+.user-list-info div{overflow-wrap:anywhere}
+.back-btn{background:#eee8f5;color:#51227c}
 #reelsPage{padding:0;background:#000;height:calc(100dvh - 115px);overflow:hidden}
-#reelsPage h2{display:none}
-#reels{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scrollbar-width:none}
-#reels::-webkit-scrollbar{display:none}
-.reel{height:100%;min-height:100%;width:100%;position:relative;background:#000;color:white;overflow:hidden;scroll-snap-align:start;scroll-snap-stop:always}
-.reel video{width:100%;height:100%;object-fit:cover;background:#000}
-.reel-side{position:absolute;right:10px;bottom:100px;z-index:4;display:flex;flex-direction:column;align-items:center;gap:16px}
-.reel-action{background:#17171766!important;color:white!important;padding:5px!important;font-size:27px!important;text-shadow:0 2px 5px #000;display:flex;flex-direction:column;align-items:center;min-width:45px}
-.reel-action small{font-size:11px;color:white}
-.reel-action.active{color:#ff4b87!important}
-.reel-bottom{position:absolute;left:13px;bottom:22px;right:70px;z-index:4;color:white;text-shadow:0 1px 5px #000}
-.reel-user{display:flex;align-items:center;gap:9px;margin-bottom:10px;flex-wrap:wrap}
-.reel-user img{width:38px;height:38px;border-radius:50%;border:2px solid white;object-fit:cover}
-.reel-follow{background:#fff!important;color:#7027bd!important;border-radius:20px!important;padding:7px 13px!important;font-size:12px!important;font-weight:bold}
-.reel-follow.following{background:#333b!important;color:white!important;border:1px solid white!important}
-.follower-count{display:block;font-size:11px;margin:3px 0 0 47px;color:white}
-.sound-btn{position:absolute;right:12px;top:18px;z-index:5;background:#2229;color:white;border-radius:50%;width:42px;height:42px;font-size:20px}
-.play-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:55px;color:white;background:#0005;border-radius:50%;padding:12px;display:none;pointer-events:none}
-.reel.paused .play-indicator{display:block}
+#reels{height:100%;width:100%;overflow-y:auto;scroll-snap-type:y mandatory}
+.reel{height:100%;min-height:100%;position:relative;background:#000;color:white;overflow:hidden;scroll-snap-align:start}
+.reel video{width:100%;height:100%;object-fit:cover}
+.reel-side{position:absolute;right:10px;bottom:100px;display:flex;flex-direction:column;gap:12px}
+.reel-action{background:#17171766!important;color:white!important;padding:5px!important;font-size:25px!important;display:flex;flex-direction:column;align-items:center}
+.reel-action small{font-size:11px}
+.reel-bottom{position:absolute;left:13px;bottom:22px;right:70px;color:white;text-shadow:0 1px 5px #000}
+.reel-user{display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.reel-user img{width:38px;height:38px;border-radius:50%;object-fit:cover}
+.reel-follow{background:white!important;color:#7027bd!important}
 #commentsModal{position:fixed;inset:0;background:#0009;z-index:1000;display:none;align-items:flex-end;justify-content:center}
 #commentsModal.open{display:flex}
 .comment-sheet{background:#fff;width:100%;max-width:600px;height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:#241532;overflow:hidden}
-.comment-top{padding:12px;text-align:center;border-bottom:1px solid #eee;font-weight:bold;font-size:17px;background:#fff;color:#241532}
+.comment-top{padding:12px;text-align:center;border-bottom:1px solid #eee;font-weight:bold}
 .comment-handle{width:42px;height:4px;background:#ccc;border-radius:10px;margin:0 auto 10px}
-#commentList{flex:1;overflow-y:auto;padding:12px;background:#fff}
+#commentList{flex:1;overflow-y:auto;padding:12px}
 .comment-row{display:flex;gap:10px;margin:17px 0;align-items:flex-start}
 .comment-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .comment-content{flex:1;min-width:0;font-size:14px}
-.comment-meta{margin-bottom:5px}
 .comment-time{color:#999;font-size:11px}
-.comment-text{line-height:1.5;overflow-wrap:anywhere}
-.comment-tools{display:flex;gap:15px;margin-top:8px;align-items:center}
-.comment-tools button{background:none;color:#777;padding:0;font-size:12px;margin:0}
-.comment-heart{background:none!important;color:#777!important;font-size:19px!important;padding:0!important}
-.comment-heart.liked{color:#ed286b!important}
-.comment-footer{border-top:1px solid #eee;padding:10px;background:#fff}
+.comment-tools{display:flex;gap:15px;margin-top:8px}
+.comment-tools button{background:none;color:#777;padding:0;font-size:12px}
+.comment-footer{border-top:1px solid #eee;padding:10px}
 .comment-emojis{display:flex;justify-content:space-around;font-size:23px;margin-bottom:10px}
 .comment-emojis span{cursor:pointer}
 .comment-input-row{display:flex;gap:7px;align-items:center}
-.comment-input-row input{margin:0;border-radius:25px;flex:1;background:#f7f3fa;color:#241532;min-width:0}
-.comment-input-row button{border-radius:20px;font-weight:bold}
+.comment-input-row input{margin:0;border-radius:25px;flex:1;min-width:0}
+.comment-input-row button{border-radius:20px}
 .activity-title{font-size:19px;font-weight:bold;margin:8px 12px 15px;color:#28133f}
 .notification-card{border-radius:12px;padding:13px;margin:10px 12px}
 .notification-row{display:flex;gap:10px;align-items:center}
 .notification-text{flex:1;font-size:14px;line-height:1.5}
-.notification-dot{color:#782bc4;font-size:18px}
 .story-circle{width:82px;height:82px;border-radius:50%;border:3px solid transparent;background:linear-gradient(#fff,#fff) padding-box,linear-gradient(45deg,#ffb000,#ff168e,#9b36ff) border-box;padding:3px;object-fit:cover;flex-shrink:0}
-.story-item{text-align:center;min-width:82px;font-size:12px;cursor:pointer;color:#28133f}
+.story-item{text-align:center;min-width:82px;font-size:12px;cursor:pointer}
 .story-strip{display:flex;gap:13px;overflow-x:auto;padding:12px 8px}
-.story-strip::-webkit-scrollbar{display:none}
 #homePage>.card:first-of-type{border:0;border-bottom:1px solid #eee;border-radius:0;box-shadow:none;padding:10px 8px;margin:0}
-#homePage>.card:first-of-type h3{color:#7027bd;margin:4px 8px}
 #homePage>h2{background:linear-gradient(110deg,#7027bd,#a855f7);color:white;border-radius:14px;margin:8px 12px;padding:16px;font-size:19px}
 #storyViewer{position:fixed;inset:0;background:#000;z-index:2000;color:white;padding:15px;text-align:center;display:none}
 #storyViewer.open{display:block}
 #storyContent{height:75vh;display:flex;align-items:center;justify-content:center}
-#storyContent img,#storyContent video{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
+#storyContent img,#storyContent video{max-width:100%;max-height:100%;object-fit:contain}
 .story-viewer-top{display:flex;justify-content:space-between;align-items:center}
 #storyViewers{max-height:70px;overflow:auto;font-size:13px;margin-top:8px}
 #authPage .card,#addPage .card{margin:14px;border-radius:18px;padding:18px}
 #authPage h2{color:#7027bd}
-#authPage button,#addPage button{background:#7027bd;color:#fff;padding:12px 18px}
 hr{border:0;border-top:1px solid #eee}
 </style>
 </head>
@@ -185,13 +164,8 @@ hr{border:0;border-top:1px solid #eee}
 </div>
 </section>
 
-<section id="reelsPage" class="page">
-<h2>🎬 Reels</h2><div id="reels"></div>
-</section>
-
-<section id="activityPage" class="page">
-<div class="activity-title">♡ Activity</div><div id="activity">Novagram activity 💜</div>
-</section>
+<section id="reelsPage" class="page"><h2>Reels</h2><div id="reels"></div></section>
+<section id="activityPage" class="page"><div class="activity-title">♡ Activity</div><div id="activity">Novagram activity 💜</div></section>
 
 <section id="profilePage" class="page">
 <div class="profile-top">
@@ -248,8 +222,7 @@ const SUPABASE_URL="https://gxnjbozxxjkfufxpiiiq.supabase.co";
 const SUPABASE_KEY="sb_publishable_ptKLjPeypXVEmehGDTl_cQ_6ajAxQAV";
 const db=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 const BUCKET="Novagram_media";
-let currentUser=null;
-let savedPosts=JSON.parse(localStorage.getItem("novagram_saved")||"[]");
+let currentUser=null,savedPosts=JSON.parse(localStorage.getItem("novagram_saved")||"[]");
 let reelObserver=null,soundOn=false,activeCommentPost=null,replyToUser="";
 let commentLikes=JSON.parse(localStorage.getItem("novagram_comment_likes")||"[]");
 let currentViewedUser=null,reelBusy={},currentFollowListType=null,currentFollowListUser=null;
@@ -258,7 +231,7 @@ let storyData=[],activeStory=null;
 function message(t){document.getElementById("status").textContent=t}
 function safe(t){return String(t||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function isVideoPost(post){
- const type=String(post.media_type||"").trim().toLowerCase(),url=String(post.media_url||"").split("?")[0].toLowerCase();
+ const type=String(post.media_type||"").toLowerCase(),url=String(post.media_url||"").split("?")[0].toLowerCase();
  return ["reel","video"].includes(type)||/\.(mp4|webm|mov|m4v|ogv|ogg)$/i.test(url)
 }
 function stopReels(){if(reelObserver){reelObserver.disconnect();reelObserver=null}document.querySelectorAll("#reels video").forEach(v=>v.pause())}
@@ -269,7 +242,7 @@ function showTab(tab){
  if(tab==="home")loadFeed();
  if(tab==="reels")loadReels();
  if(tab==="profile")loadProfile();
- if(tab==="activity")loadActivity();
+ if(tab==="activity")loadActivity()
 }
 async function login(){
  const email=document.getElementById("email").value.trim(),password=document.getElementById("password").value;
@@ -342,7 +315,7 @@ async function uploadStory(){
 }
 async function loadStories(){
  if(!currentUser)return;
- const list=document.getElementById("storyList");if(!list)return;
+ const list=document.getElementById("storyList");
  list.innerHTML="<span class='muted'>Stories loading...</span>";
  const cutoff=new Date(Date.now()-86400000).toISOString();
  const {data,error}=await db.from("stories").select("*").gt("created_at",cutoff).order("created_at",{ascending:true});
@@ -359,22 +332,20 @@ async function loadStories(){
  list.innerHTML=html
 }
 async function openStory(storyId){
- const story=storyData.find(s=>s.id===storyId);if(!story)return message("Story nahi mili");
+ const story=storyData.find(s=>String(s.id)===String(storyId));if(!story)return message("Story nahi mili");
  activeStory=story;const profiles=await getProfiles([story.user_id]),p=profiles[story.user_id]||{};
  document.getElementById("storyOwnerName").textContent=story.user_id===currentUser.id?"Your Story":"@"+(p.username||"user");
- const content=document.getElementById("storyContent");
- content.innerHTML=story.media_type==="video"?`<video src="${safe(story.media_url)}" controls autoplay playsinline></video>`:`<img src="${safe(story.media_url)}" alt="Story">`;
- const own=story.user_id===currentUser.id;
- document.getElementById("deleteStoryButton").classList.toggle("hidden",!own);
+ document.getElementById("storyContent").innerHTML=story.media_type==="video"?`<video src="${safe(story.media_url)}" controls autoplay playsinline></video>`:`<img src="${safe(story.media_url)}" alt="Story">`;
+ document.getElementById("deleteStoryButton").classList.toggle("hidden",story.user_id!==currentUser.id);
  const viewers=document.getElementById("storyViewers");viewers.innerHTML="";
- if(own){
+ if(story.user_id===currentUser.id){
   const {data,error}=await db.from("story_views").select("viewer_id,created_at").eq("story_id",story.id).order("created_at",{ascending:false});
   if(error)viewers.textContent="Viewers load nahi hue: "+error.message;
   else if(data?.length){const vp=await getProfiles(data.map(v=>v.viewer_id));viewers.innerHTML="<b>👀 Viewed by:</b> "+data.map(v=>"@"+safe(vp[v.viewer_id]?.username||"user")).join(", ")}
   else viewers.textContent="Abhi kisi ne Story nahi dekhi"
  }else{
   const {error}=await db.from("story_views").upsert({story_id:story.id,viewer_id:currentUser.id},{onConflict:"story_id,viewer_id",ignoreDuplicates:true});
-  if(error)message("View save nahi hua: "+error.message);viewers.textContent="💜 Novagram Story"
+  if(error)message("View save nahi hua: "+error.message)
  }
  document.getElementById("storyViewer").classList.add("open")
 }
@@ -388,98 +359,98 @@ async function deleteCurrentStory(){
  closeStory();message("Story delete ho gayi 💜");await loadStories()
 }
 
-/* FOLLOW DATA */
+/* FOLLOW */
 async function getFollowData(userIds){
  const ids=[...new Set(userIds)].filter(Boolean),result={counts:{},following:{}};
  if(!ids.length)return result;
  const {data,error}=await db.from("follows").select("follower_id,following_id").in("following_id",ids);
- if(error){message("Follow data error: "+error.message);return result}
+ if(error){message(error.message);return result}
  (data||[]).forEach(row=>{result.counts[row.following_id]=(result.counts[row.following_id]||0)+1;if(row.follower_id===currentUser.id)result.following[row.following_id]=true});
  return result
 }
 async function getMyFollowStats(userId){
- const [followers,following]=await Promise.all([
+ const [a,b]=await Promise.all([
   db.from("follows").select("id",{count:"exact",head:true}).eq("following_id",userId),
   db.from("follows").select("id",{count:"exact",head:true}).eq("follower_id",userId)
  ]);
- if(followers.error)message(followers.error.message);if(following.error)message(following.error.message);
- return {followers:followers.count||0,following:following.count||0}
+ if(a.error)message(a.error.message);if(b.error)message(b.error.message);
+ return {followers:a.count||0,following:b.count||0}
 }
 async function toggleFollow(userId){
- if(!currentUser)return message("Pehle login karo");
- if(userId===currentUser.id)return message("Apni ID ko follow nahi kar sakte");
- if(reelBusy["follow_"+userId])return;
- reelBusy["follow_"+userId]=true;
- const buttons=[...document.querySelectorAll("[data-follow-user]")].filter(b=>b.dataset.followUser===userId);
- buttons.forEach(b=>b.disabled=true);
+ if(!currentUser||userId===currentUser.id)return;
+ const key="follow_"+userId;if(reelBusy[key])return;reelBusy[key]=true;
  const {data,error}=await db.from("follows").select("id").eq("follower_id",currentUser.id).eq("following_id",userId).maybeSingle();
- if(error){buttons.forEach(b=>b.disabled=false);reelBusy["follow_"+userId]=false;return message(error.message)}
- let result=data?await db.from("follows").delete().eq("follower_id",currentUser.id).eq("following_id",userId):await db.from("follows").insert({follower_id:currentUser.id,following_id:userId});
- if(result.error){buttons.forEach(b=>b.disabled=false);reelBusy["follow_"+userId]=false;return message(result.error.message)}
- const nowFollowing=!data;
- buttons.forEach(b=>{b.textContent=nowFollowing?"Following":"Follow";b.classList.toggle("following",nowFollowing);b.disabled=false});
- const countNodes=[...document.querySelectorAll("#reels [data-follower-user]")].filter(n=>n.dataset.followerUser===userId);
- countNodes.forEach(n=>{const match=n.textContent.match(/\d+/);let count=Number(match?match[0]:0);count+=nowFollowing?1:-1;n.textContent="👥 "+Math.max(0,count)+" Followers"});
- reelBusy["follow_"+userId]=false;message(nowFollowing?"Follow ho gaya 💜":"Unfollow ho gaya");
+ if(error){reelBusy[key]=false;return message(error.message)}
+ const result=data?await db.from("follows").delete().eq("follower_id",currentUser.id).eq("following_id",userId):await db.from("follows").insert({follower_id:currentUser.id,following_id:userId});
+ reelBusy[key]=false;if(result.error)return message(result.error.message);
+ message(data?"Unfollow ho gaya":"Follow ho gaya 💜");
  if(currentFollowListUser)await showFollowList(currentFollowListType,currentFollowListUser);
- if(currentViewedUser===userId)openUserProfile(userId);
- else if(document.getElementById("searchPage").classList.contains("active"))searchPeople()
+ if(currentViewedUser===userId)openUserProfile(userId);else if(document.getElementById("searchPage").classList.contains("active"))searchPeople()
 }
 async function showFollowList(type,userId=currentUser?.id){
- if(!currentUser||!userId)return message("Pehle login karo");
+ if(!currentUser||!userId)return;
  currentFollowListType=type;currentFollowListUser=userId;
  const box=document.getElementById("followList")||document.getElementById("otherFollowList");if(!box)return;
  box.innerHTML="<p>Loading...</p>";
- const column=type==="followers"?"following_id":"follower_id",otherColumn=type==="followers"?"follower_id":"following_id";
+ const column=type==="followers"?"following_id":"follower_id",other=type==="followers"?"follower_id":"following_id";
  const {data,error}=await db.from("follows").select("follower_id,following_id").eq(column,userId);
  if(error){box.textContent=error.message;return}
- const ids=[...new Set((data||[]).map(x=>x[otherColumn]).filter(Boolean))];
- if(!ids.length){box.innerHTML=`<div class="follow-list-head"><h3>${type==="followers"?"Followers":"Following"}</h3><button class="back-btn" onclick="closeFollowList()">Close</button></div><p class="muted">Abhi koi ${type==="followers"?"follower":"following"} nahi hai 💜</p>`;return}
- const [profiles,follows]=await Promise.all([getProfiles(ids),getFollowData(ids)]);
+ const ids=[...new Set((data||[]).map(x=>x[other]).filter(Boolean))];
  let html=`<div class="follow-list-head"><h3>${type==="followers"?"Followers":"Following"}</h3><button class="back-btn" onclick="closeFollowList()">Close</button></div>`;
- html+=ids.map(id=>{
-  const p=profiles[id]||{},mine=id===currentUser.id,following=!!follows.following[id];
-  return `<div class="user-list-row"><div class="user-list-info"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}"><div><b class="user-name" onclick="openUserProfile('${id}')">@${safe(p.username||"user")}</b><div class="muted">${safe(p.full_name||"")}</div></div></div>${mine?"":`<button class="follow-btn ${following?"following":""}" data-follow-user="${id}" onclick="toggleFollow('${id}')">${following?"Following":"Follow"}</button>`}</div>`
- }).join("");
+ if(!ids.length){box.innerHTML=html+"<p class='muted'>Abhi koi nahi hai 💜</p>";return}
+ const [profiles,follows]=await Promise.all([getProfiles(ids),getFollowData(ids)]);
+ html+=ids.map(id=>{const p=profiles[id]||{},mine=id===currentUser.id,following=!!follows.following[id];return `<div class="user-list-row"><div class="user-list-info"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80")}"><div><b class="user-name" onclick="openUserProfile('${id}')">@${safe(p.username||"user")}</b><div class="muted">${safe(p.full_name||"")}</div></div></div>${mine?"":`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${id}')">${following?"Following":"Follow"}</button>`}</div>`}).join("");
  box.innerHTML=html
 }
-function closeFollowList(){
- currentFollowListType=null;currentFollowListUser=null;
- const box=document.getElementById("followList");if(box)box.innerHTML="";
- const other=document.getElementById("otherFollowList");if(other)other.innerHTML=""
-}
+function closeFollowList(){currentFollowListType=null;currentFollowListUser=null;["followList","otherFollowList"].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=""})}
 
-/* PROFILE MENU */
-function toggleProfileMenu(event){if(event)event.stopPropagation();document.getElementById("profileMenu")?.classList.toggle("hidden")}
+/* MENU */
+function toggleProfileMenu(e){if(e)e.stopPropagation();document.getElementById("profileMenu")?.classList.toggle("hidden")}
 function closeProfileMenu(){document.getElementById("profileMenu")?.classList.add("hidden")}
-function editProfileOpen(){
- closeProfileMenu();
- const area=document.getElementById("editProfileArea");
- if(area){area.classList.toggle("hidden");area.scrollIntoView({behavior:"smooth",block:"nearest"})}
-}
+function editProfileOpen(){closeProfileMenu();const a=document.getElementById("editProfileArea");if(a){a.classList.toggle("hidden");a.scrollIntoView({behavior:"smooth",block:"nearest"})}}
 function showSettings(){closeProfileMenu();message("Settings ke options jald add honge 💜")}
 function showPrivacy(){closeProfileMenu();message("Privacy settings jald add hongi 💜")}
 async function showSavedPosts(){
  closeProfileMenu();const box=document.getElementById("myPosts");
  if(!savedPosts.length){box.innerHTML="<p class='ig-grid-empty'>Abhi koi saved post nahi hai 💜</p>";return}
  const {data,error}=await db.from("posts").select("*").in("id",savedPosts);
- if(error){box.textContent=error.message;return}
- if(!data?.length){box.innerHTML="<p>Saved posts nahi mili 💜</p>";return}
+ if(error)return message(error.message);
  const profiles=await getProfiles(data.map(p=>p.user_id)),counts=await getCounts(data.map(p=>p.id));
  let html="<h3 style='padding:10px'>🔖 Saved Posts</h3>";
  for(const p of data)html+=await postCard(p,profiles[p.user_id],counts);
  box.innerHTML=html
 }
 
-/* MEDIA AND POSTS */
+/* POSTS */
 function mediaHTML(post){
  if(isVideoPost(post))return `<video class="post-media" src="${safe(post.media_url)}" controls playsinline></video>`;
- if(String(post.media_type||"").trim().toLowerCase()==="image")return `<img class="post-media" src="${safe(post.media_url)}" alt="Post">`;
- return ""
+ return `<img class="post-media" src="${safe(post.media_url)}" alt="Novagram post" loading="lazy">`
+}
+function formatDate(date){
+ if(!date)return "";
+ return new Date(date).toLocaleDateString("en-IN",{day:"numeric",month:"long",year:"numeric"})
 }
 async function postCard(post,profile,counts){
  const liked=(counts.likes[post.id]||[]).includes(currentUser.id),likeCount=(counts.likes[post.id]||[]).length,commentCount=counts.comments[post.id]||0,mine=post.user_id===currentUser.id;
- return `<article class="card"><div class="post-head"><img class="avatar" src="${safe(profile?.avatar_url||"https://placehold.co/80x80?text=User")}"><b class="user-name" onclick="openUserProfile('${post.user_id}')">@${safe(profile?.username||"user")}</b></div>${mediaHTML(post)}<p>${safe(post.caption)}</p><div class="actions"><button class="${liked?"liked":""}" onclick="toggleLike('${post.id}')">${liked?"❤️":"♡"} Like (${likeCount})</button><button onclick="addComment('${post.id}')">💬 Comment (${commentCount})</button><button onclick="sharePost('${post.id}')">➤ Share</button>${mine?`<button onclick="deletePost('${post.id}')">Delete</button>`:""}</div></article>`
+ const username=profile?.username||"user",avatar=profile?.avatar_url||"https://placehold.co/80x80?text=User";
+ return `<article class="post-card" id="post-${post.id}">
+ <div class="post-head">
+  <img class="avatar" src="${safe(avatar)}">
+  <div><b class="user-name" onclick="openUserProfile('${post.user_id}')">@${safe(username)}</b><div class="muted">Novagram 💜</div></div>
+  ${mine?`<button class="post-menu" onclick="deletePost('${post.id}')">⋮</button>`:""}
+ </div>
+ ${mediaHTML(post)}
+ <div class="post-actions">
+  <button class="${liked?"liked":""}" onclick="toggleLike('${post.id}')">${liked?"❤️":"♡"}</button>
+  <button onclick="addComment('${post.id}')">💬</button>
+  <button onclick="sharePost('${post.id}')">➤</button>
+  <button class="save-action" onclick="savePost('${post.id}')">${savedPosts.includes(post.id)?"🔖":"♧"}</button>
+ </div>
+ <div class="post-likes">${likeCount} likes</div>
+ <p class="post-caption"><b class="user-name" onclick="openUserProfile('${post.user_id}')">@${safe(username)}</b> ${safe(post.caption||"")}</p>
+ <div class="post-date">${formatDate(post.created_at)}</div>
+ <div class="actions"><button onclick="addComment('${post.id}')">View all ${commentCount} comments</button></div>
+ </article>`
 }
 async function loadFeed(){
  if(!currentUser)return;await loadStories();
@@ -497,53 +468,40 @@ async function loadReels(){
  if(!currentUser)return;stopReels();
  const box=document.getElementById("reels");box.innerHTML="<p style='color:white;padding:20px'>Loading Reels...</p>";
  const {data:allPosts,error}=await db.from("posts").select("*").order("created_at",{ascending:false});
- if(error){box.textContent="Reels load nahi hui: "+error.message;return}
+ if(error){box.textContent=error.message;return}
  const data=(allPosts||[]).filter(isVideoPost);
  if(!data.length){box.innerHTML="<p style='color:white;padding:20px'>Abhi koi video Reel nahi mili. Add se video upload karo 💜</p>";return}
- const ownerIds=data.map(p=>p.user_id),profiles=await getProfiles(ownerIds),counts=await getCounts(data.map(p=>p.id)),follows=await getFollowData(ownerIds);
+ const ids=data.map(p=>p.user_id),profiles=await getProfiles(ids),counts=await getCounts(data.map(p=>p.id)),follows=await getFollowData(ids);
  box.innerHTML=data.map(p=>{
-  const profile=profiles[p.user_id]||{},liked=(counts.likes[p.id]||[]).includes(currentUser.id),likeCount=(counts.likes[p.id]||[]).length,commentCount=counts.comments[p.id]||0,isSaved=savedPosts.includes(p.id),mine=p.user_id===currentUser.id,followerCount=follows.counts[p.user_id]||0,isFollowing=!!follows.following[p.user_id];
-  return `<article class="reel"><video src="${safe(p.media_url)}" loop muted playsinline preload="metadata" onclick="toggleReelPlay(this)"></video><div class="play-indicator">▶</div><button class="sound-btn" onclick="toggleSound(this)">🔇</button><div class="reel-side"><button class="reel-action ${liked?"active":""}" data-like-post="${p.id}" onclick="toggleLike('${p.id}',true)">❤️<small>${likeCount}</small></button><button class="reel-action" data-comment-post="${p.id}" onclick="addComment('${p.id}')">💬<small>${commentCount}</small></button><button class="reel-action" onclick="sharePost('${p.id}')">➤<small>Share</small></button><button class="reel-action ${isSaved?"active":""}" onclick="savePost('${p.id}')">🔖<small>Save</small></button>${mine?`<button class="reel-action" onclick="deletePost('${p.id}')">🗑️<small>Delete</small></button>`:""}</div><div class="reel-bottom"><div class="reel-user"><img src="${safe(profile.avatar_url||"https://placehold.co/80x80?text=User")}"><b onclick="openUserProfile('${p.user_id}')">@${safe(profile.username||"user")}</b>${!mine?`<button class="reel-follow ${isFollowing?"following":""}" data-follow-user="${p.user_id}" onclick="toggleFollow('${p.user_id}')">${isFollowing?"Following":"Follow"}</button>`:""}</div><span class="follower-count" data-follower-user="${p.user_id}">👥 ${followerCount} Followers</span><div class="reel-caption">${safe(p.caption)}</div></div></article>`
+  const profile=profiles[p.user_id]||{},liked=(counts.likes[p.id]||[]).includes(currentUser.id),mine=p.user_id===currentUser.id;
+  return `<article class="reel"><video src="${safe(p.media_url)}" loop muted playsinline preload="metadata" onclick="toggleReelPlay(this)"></video><div class="reel-side"><button class="reel-action" onclick="toggleLike('${p.id}')">❤️<small>${(counts.likes[p.id]||[]).length}</small></button><button class="reel-action" onclick="addComment('${p.id}')">💬<small>${counts.comments[p.id]||0}</small></button><button class="reel-action" onclick="sharePost('${p.id}')">➤<small>Share</small></button></div><div class="reel-bottom"><div class="reel-user"><img src="${safe(profile.avatar_url||"https://placehold.co/80x80")}"><b onclick="openUserProfile('${p.user_id}')">@${safe(profile.username||"user")}</b>${!mine?`<button class="reel-follow" onclick="toggleFollow('${p.user_id}')">Follow</button>`:""}</div>${safe(p.caption)}</div></article>`
  }).join("");
- startReelObserver();message("💜 "+data.length+" Reels mil gayi")
+ startReelObserver()
 }
 function startReelObserver(){
  if(reelObserver)reelObserver.disconnect();
  const videos=document.querySelectorAll("#reels video");
- reelObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
-  const video=entry.target;
-  if(entry.isIntersecting&&entry.intersectionRatio>=.65){video.muted=!soundOn;video.play().catch(()=>{});video.closest(".reel")?.classList.remove("paused")}
-  else video.pause()
- }),{root:document.getElementById("reels"),threshold:[0,.3,.65,1]});
- videos.forEach(video=>reelObserver.observe(video))
+ reelObserver=new IntersectionObserver(entries=>entries.forEach(e=>{if(e.isIntersecting&&e.intersectionRatio>.65)e.target.play().catch(()=>{});else e.target.pause()}),{root:document.getElementById("reels"),threshold:[0,.65,1]});
+ videos.forEach(v=>reelObserver.observe(v))
 }
-function toggleReelPlay(video){
- const reel=video.closest(".reel");
- if(video.paused){video.play().catch(()=>{});reel.classList.remove("paused")}
- else{video.pause();reel.classList.add("paused")}
-}
-function toggleSound(button){
- soundOn=!soundOn;const video=button.closest(".reel").querySelector("video");
- video.muted=!soundOn;button.textContent=soundOn?"🔊":"🔇";
- if(soundOn)document.querySelectorAll("#reels video").forEach(v=>{if(v!==video)v.muted=true})
-}
+function toggleReelPlay(video){if(video.paused)video.play().catch(()=>{});else video.pause()}
 
-/* LIKE */
-async function toggleLike(postId,isReel=false){
- if(!currentUser)return message("Pehle login karo");
- if(reelBusy["like_"+postId])return;reelBusy["like_"+postId]=true;
- const buttons=[...document.querySelectorAll("#reels [data-like-post]")].filter(b=>b.dataset.likePost===postId);buttons.forEach(b=>b.disabled=true);
+/* LIKES */
+async function toggleLike(postId){
+ if(!currentUser)return;
+ const key="like_"+postId;if(reelBusy[key])return;reelBusy[key]=true;
  const {data,error}=await db.from("likes").select("post_id").eq("post_id",postId).eq("user_id",currentUser.id).maybeSingle();
- if(error){buttons.forEach(b=>b.disabled=false);reelBusy["like_"+postId]=false;return message(error.message)}
+ if(error){reelBusy[key]=false;return message(error.message)}
  const result=data?await db.from("likes").delete().eq("post_id",postId).eq("user_id",currentUser.id):await db.from("likes").insert({post_id:postId,user_id:currentUser.id});
- if(result.error){buttons.forEach(b=>b.disabled=false);reelBusy["like_"+postId]=false;return message(result.error.message)}
- buttons.forEach(b=>{const small=b.querySelector("small");let count=Number(small?.textContent||0);count+=data?-1:1;if(small)small.textContent=Math.max(0,count);b.classList.toggle("active",!data);b.disabled=false});
- reelBusy["like_"+postId]=false;if(!isReel)loadFeed()
+ reelBusy[key]=false;if(result.error)return message(result.error.message);
+ if(document.getElementById("homePage").classList.contains("active"))loadFeed();
+ else if(document.getElementById("profilePage").classList.contains("active"))loadProfile();
+ else if(document.getElementById("reelsPage").classList.contains("active"))loadReels();
 }
 
 /* COMMENTS */
 async function addComment(postId){
- if(!currentUser)return message("Pehle login karo");
+ if(!currentUser)return;
  activeCommentPost=postId;replyToUser="";
  document.getElementById("commentInput").value="";
  document.getElementById("commentInput").placeholder="Join the conversation...";
@@ -552,40 +510,26 @@ async function addComment(postId){
 function closeComments(){document.getElementById("commentsModal").classList.remove("open")}
 function addEmoji(emoji){const input=document.getElementById("commentInput");input.value+=emoji;input.focus()}
 async function loadComments(){
- const box=document.getElementById("commentList");box.innerHTML="<p class='muted'>Comments loading...</p>";
+ const box=document.getElementById("commentList");box.innerHTML="<p>Comments loading...</p>";
  const {data,error}=await db.from("comments").select("*").eq("post_id",activeCommentPost).order("created_at",{ascending:true});
  if(error){box.textContent=error.message;return}
  if(!data?.length){box.innerHTML="<p class='muted'>Abhi koi comment nahi hai. Pehla comment karo 💜</p>";return}
  const profiles=await getProfiles(data.map(c=>c.user_id));
- box.innerHTML=data.map(c=>{
-  const p=profiles[c.user_id]||{},username=p.username||"user",avatar=p.avatar_url||"https://placehold.co/80x80?text=User",liked=commentLikes.includes(String(c.id)),date=c.created_at?new Date(c.created_at).toLocaleDateString():"";
-  return `<div class="comment-row"><img class="comment-avatar" src="${safe(avatar)}"><div class="comment-content"><div class="comment-meta"><b>@${safe(username)}</b> <span class="comment-time">${safe(date)}</span></div><div class="comment-text">${safe(c.comment)}</div><div class="comment-tools"><button class="comment-heart ${liked?"liked":""}" onclick="likeComment('${c.id}')">${liked?"❤️":"♡"}</button><button onclick="replyComment('${safe(username)}')">Reply</button>${c.user_id===currentUser.id?`<button onclick="deleteComment('${c.id}')">Delete</button>`:""}</div></div></div>`
- }).join("")
+ box.innerHTML=data.map(c=>{const p=profiles[c.user_id]||{};return `<div class="comment-row"><img class="comment-avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80")}"><div class="comment-content"><b>@${safe(p.username||"user")}</b><div>${safe(c.comment)}</div><div class="comment-tools">${c.user_id===currentUser.id?`<button onclick="deleteComment('${c.id}')">Delete</button>`:""}</div></div></div>`}).join("")
 }
 async function sendComment(){
- if(!currentUser)return message("Pehle login karo");
+ if(!currentUser)return;
  const input=document.getElementById("commentInput");let text=input.value.trim();if(!text)return;
- if(reelBusy["comment_"+activeCommentPost])return;
- const postId=activeCommentPost;if(replyToUser)text="@"+replyToUser+" "+text;
- reelBusy["comment_"+postId]=true;const sendButton=document.querySelector(".comment-input-row button");if(sendButton)sendButton.disabled=true;
- const {error}=await db.from("comments").insert({post_id:postId,user_id:currentUser.id,comment:text});
- if(error){reelBusy["comment_"+postId]=false;if(sendButton)sendButton.disabled=false;return message(error.message)}
- input.value="";replyToUser="";input.placeholder="Join the conversation...";
- reelBusy["comment_"+postId]=false;if(sendButton)sendButton.disabled=false;
- message("Comment post ho gaya 💜");
- const commentButtons=[...document.querySelectorAll("#reels [data-comment-post]")].filter(b=>b.dataset.commentPost===postId);
- commentButtons.forEach(b=>{const small=b.querySelector("small");if(small)small.textContent=Number(small.textContent||0)+1});
- await loadComments()
+ if(replyToUser)text="@"+replyToUser+" "+text;
+ const {error}=await db.from("comments").insert({post_id:activeCommentPost,user_id:currentUser.id,comment:text});
+ if(error)return message(error.message);
+ input.value="";replyToUser="";message("Comment post ho gaya 💜");await loadComments()
 }
-function replyComment(username){replyToUser=username;const input=document.getElementById("commentInput");input.placeholder="@"+username+" ko reply karo...";input.focus()}
-function likeComment(id){
- id=String(id);if(commentLikes.includes(id))commentLikes=commentLikes.filter(x=>x!==id);else commentLikes.push(id);
- localStorage.setItem("novagram_comment_likes",JSON.stringify(commentLikes));loadComments()
-}
+function replyComment(username){replyToUser=username;document.getElementById("commentInput").placeholder="@"+username+" ko reply karo..."}
 async function deleteComment(id){
  if(!confirm("Comment delete karein?"))return;
  const {error}=await db.from("comments").delete().eq("id",id).eq("user_id",currentUser.id);
- if(error)return message(error.message);message("Comment delete ho gaya");await loadComments()
+ if(error)return message(error.message);await loadComments()
 }
 
 /* SHARE AND SAVE */
@@ -596,26 +540,25 @@ async function sharePost(postId){
 }
 async function shareProfile(){
  closeProfileMenu();
- const {data:p}=await db.from("profiles").select("username,full_name").eq("id",currentUser.id).maybeSingle();
+ const {data:p}=await db.from("profiles").select("username").eq("id",currentUser.id).maybeSingle();
  const url=location.href.split("?")[0],text="Novagram par meri profile dekho 💜 @"+(p?.username||"user");
  if(navigator.share){try{await navigator.share({title:"Novagram 💜",text,url})}catch(e){}}
- else{try{await navigator.clipboard.writeText(text+" "+url);message("Profile link copy ho gaya 💜")}catch(e){message(url)}}
+ else{try{await navigator.clipboard.writeText(text+" "+url);message("Profile link copy ho gaya")}catch(e){message(url)}}
 }
 function savePost(postId){
  if(savedPosts.includes(postId))savedPosts=savedPosts.filter(x=>x!==postId);else savedPosts.push(postId);
  localStorage.setItem("novagram_saved",JSON.stringify(savedPosts));
- const button=[...document.querySelectorAll("#reels .reel-action")].find(b=>b.getAttribute("onclick")===`savePost('${postId}')`);
- if(button)button.classList.toggle("active",savedPosts.includes(postId))
+ message(savedPosts.includes(postId)?"Post save ho gayi 💜":"Saved se hata di")
 }
 
-/* POST UPLOAD */
+/* UPLOAD AND DELETE POSTS */
 async function uploadPost(){
  if(!currentUser)return message("Pehle login karo");
  const file=document.getElementById("mediaFile").files[0],caption=document.getElementById("caption").value.trim();
  if(!file)return message("Pehle photo ya video select karo");
  if(file.size>50*1024*1024)return message("File 50 MB se chhoti honi chahiye");
  message("Upload ho raha hai...");
- const ext=file.name.split(".").pop(),path=currentUser.id+"/"+Date.now()+"."+ext;
+ const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path=currentUser.id+"/"+Date.now()+"."+ext;
  const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{upsert:false});
  if(uploadError)return message(uploadError.message);
  const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
@@ -628,62 +571,58 @@ async function uploadPost(){
 async function deletePost(id){
  if(!confirm("Kya tum ye post delete karna chahte ho?"))return;
  const {error}=await db.from("posts").delete().eq("id",id).eq("user_id",currentUser.id);
- if(error)return message(error.message);message("Post delete ho gayi");showTab("home")
+ if(error)return message(error.message);
+ message("Post delete ho gayi 💜");showTab("home")
 }
 
 /* PROFILE PHOTO */
 async function uploadProfilePhoto(){
- if(!currentUser)return message("Pehle login karo");
  const input=document.getElementById("profilePhotoFile"),file=input?.files?.[0];
- if(!file)return message("Pehle gallery se photo select karo");
+ if(!file)return;
  if(!file.type.startsWith("image/"))return message("Sirf image select karo");
  if(file.size>5*1024*1024)return message("Photo 5 MB se chhoti honi chahiye");
- message("Profile photo upload ho rahi hai...");
+ message("Photo upload ho rahi hai...");
  const ext=(file.name.split(".").pop()||"jpg").toLowerCase(),path="profile-photos/"+currentUser.id+"/"+Date.now()+"."+ext;
- const {error:uploadError}=await db.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
- if(uploadError)return message("Photo upload error: "+uploadError.message);
- const {data:urlData}=db.storage.from(BUCKET).getPublicUrl(path);
- const {error:updateError}=await db.from("profiles").update({avatar_url:urlData.publicUrl}).eq("id",currentUser.id);
- if(updateError)return message("Profile update error: "+updateError.message);
- message("Profile photo update ho gayi 💜");await loadProfile()
+ const {error:up}=await db.storage.from(BUCKET).upload(path,file,{upsert:false,contentType:file.type});
+ if(up)return message(up.message);
+ const {data:url}=db.storage.from(BUCKET).getPublicUrl(path);
+ const {error}=await db.from("profiles").update({avatar_url:url.publicUrl}).eq("id",currentUser.id);
+ if(error)return message(error.message);
+ message("Profile photo update ho gayi 💜");loadProfile()
 }
 
 /* EDIT PROFILE */
 async function saveProfile(){
- if(!currentUser)return message("Pehle login karo");
  const full_name=document.getElementById("editFullName").value.trim();
  const username=document.getElementById("editUsername").value.trim().replace(/^@/,"").toLowerCase();
  const bio=document.getElementById("editBio").value.trim();
  if(!full_name||!username)return message("Name aur Username zaroori hain");
- if(!/^[a-z0-9_]{3,20}$/.test(username))return message("Username 3-20 characters ka ho, sirf letters, numbers aur _");
- const button=document.getElementById("saveProfileButton");button.disabled=true;message("Profile save ho rahi hai...");
+ if(!/^[a-z0-9_]{3,20}$/.test(username))return message("Username 3-20 characters ka ho");
+ const button=document.getElementById("saveProfileButton");button.disabled=true;
  const {error}=await db.from("profiles").update({full_name,username,bio}).eq("id",currentUser.id);
- button.disabled=false;if(error)return message("Profile error: "+error.message);
- message("Profile update ho gayi 💜");await loadProfile()
+ button.disabled=false;if(error)return message(error.message);
+ message("Profile update ho gayi 💜");loadProfile()
 }
 
-/* NEW INSTAGRAM STYLE MY PROFILE */
+/* MY PROFILE */
 async function loadProfile(){
  if(!currentUser)return;closeFollowList();closeProfileMenu();
  const box=document.getElementById("myProfile"),postsBox=document.getElementById("myPosts");
  box.innerHTML="<p style='padding:20px'>Profile loading... 💜</p>";postsBox.innerHTML="";
  const {data:p,error}=await db.from("profiles").select("*").eq("id",currentUser.id).maybeSingle();
  if(error){box.textContent=error.message;return}
- const [stats,postResult]=await Promise.all([
+ const [stats,result]=await Promise.all([
   getMyFollowStats(currentUser.id),
   db.from("posts").select("*").eq("user_id",currentUser.id).order("created_at",{ascending:false})
  ]);
- if(postResult.error){postsBox.textContent=postResult.error.message;return}
- const posts=postResult.data||[],photo=p?.avatar_url||"https://placehold.co/120x120?text=User";
+ if(result.error){postsBox.textContent=result.error.message;return}
+ const posts=result.data||[],photo=p?.avatar_url||"https://placehold.co/120x120?text=User";
  box.innerHTML=`
  <input id="profilePhotoFile" type="file" accept="image/*" class="hidden" onchange="uploadProfilePhoto()">
  <div class="ig-profile">
   <div class="ig-profile-top">
-   <img class="ig-profile-photo" src="${safe(photo)}" alt="Profile photo" onclick="document.getElementById('profilePhotoFile').click()">
-   <div class="ig-profile-info">
-    <div class="ig-profile-username">${safe(p?.username||"user")}</div>
-    <div class="muted">Novagram 💜</div>
-   </div>
+   <img class="ig-profile-photo" src="${safe(photo)}" onclick="document.getElementById('profilePhotoFile').click()">
+   <div class="ig-profile-info"><div class="ig-profile-username">${safe(p?.username||"user")}</div><div class="muted">Novagram 💜</div></div>
   </div>
   <div class="ig-stats">
    <div class="ig-stat"><b>${posts.length}</b><span>Posts</span></div>
@@ -691,10 +630,7 @@ async function loadProfile(){
    <button class="ig-stat" onclick="showFollowList('following')"><b>${stats.following}</b><span>Following</span></button>
   </div>
   <div class="ig-bio"><b>${safe(p?.full_name||"Novagram User")}</b><br>${safe(p?.bio||"Welcome to Novagram 💜")}<br><span class="muted">${safe(currentUser.email)}</span></div>
-  <div class="ig-buttons">
-   <button class="ig-edit" onclick="editProfileOpen()">Edit Profile</button>
-   <button class="ig-share" onclick="shareProfile()">Share Profile</button>
-  </div>
+  <div class="ig-buttons"><button class="ig-edit" onclick="editProfileOpen()">Edit Profile</button><button class="ig-share" onclick="shareProfile()">Share Profile</button></div>
   <div id="editProfileArea" class="ig-edit-area hidden">
    <h3>✏️ Edit Profile</h3>
    <input id="editFullName" placeholder="Your Name" value="${safe(p?.full_name||"")}">
@@ -704,107 +640,72 @@ async function loadProfile(){
   </div>
   <div id="followList"></div>
  </div>
- <div class="ig-tabs"><button title="Posts">▦</button><button title="Reels" onclick="showTab('reels')">▣</button></div>`;
+ <div class="ig-tabs"><button>▦</button><button onclick="showTab('reels')">▣</button></div>`;
  if(!posts.length){postsBox.innerHTML="<div class='ig-grid-empty'><div style='font-size:40px'>▦</div><b>Abhi koi post nahi hai</b><p class='muted'>Tumhari posts yahan dikhengi 💜</p></div>";return}
  postsBox.innerHTML='<div class="ig-grid">'+posts.map(post=>{
-  const media=isVideoPost(post)
-   ?`<video src="${safe(post.media_url)}" muted playsinline preload="metadata"></video><span class="ig-grid-video">▶</span>`
-   :`<img src="${safe(post.media_url)}" alt="Post">`;
+  const media=isVideoPost(post)?`<video src="${safe(post.media_url)}" muted playsinline preload="metadata"></video><span class="ig-grid-video">▶</span>`:`<img src="${safe(post.media_url)}" alt="Post" loading="lazy">`;
   return `<div class="ig-grid-item" onclick="showProfilePost('${post.id}')">${media}</div>`
  }).join("")+'</div>'
 }
-
-/* Open a post from profile grid */
 async function showProfilePost(postId){
  const {data:post,error}=await db.from("posts").select("*").eq("id",postId).maybeSingle();
  if(error||!post)return message(error?.message||"Post nahi mili");
  const profiles=await getProfiles([post.user_id]),counts=await getCounts([post.id]);
- const html=await postCard(post,profiles[post.user_id],counts);
- const box=document.getElementById("myPosts");
- box.innerHTML=`<button class="back-btn" onclick="loadProfile()">← Back to Profile Grid</button>`+html;
- box.scrollIntoView({behavior:"smooth",block:"start"})
+ document.getElementById("myPosts").innerHTML=`<button class="back-btn" onclick="loadProfile()">← Back to Profile Grid</button>`+await postCard(post,profiles[post.user_id],counts);
+ document.getElementById("myPosts").scrollIntoView({behavior:"smooth"})
 }
 
-/* SEARCH PEOPLE */
+/* SEARCH */
 async function searchPeople(){
- if(!currentUser)return message("Pehle login karo");
+ if(!currentUser)return;
  const q=document.getElementById("searchInput").value.trim().replace(/^@/,"");
  if(!q)return message("Username likho");
- const box=document.getElementById("searchResults");box.innerHTML="Searching... 💜";
+ const box=document.getElementById("searchResults");box.innerHTML="Searching...";
  const {data,error}=await db.from("profiles").select("*").ilike("username","%"+q+"%").limit(30);
- if(error){box.textContent="Search error: "+error.message;return}
- if(!data||data.length===0){box.innerHTML="<p>Koi user nahi mila 💜</p>";return}
- const ids=data.map(p=>p.id),[follows,statsResults]=await Promise.all([getFollowData(ids),Promise.all(ids.map(id=>getMyFollowStats(id)))]);
- box.innerHTML=data.map((p,index)=>{
-  const mine=p.id===currentUser.id,following=!!follows.following[p.id],stats=statsResults[index];
-  return `<div class="user-card"><div class="post-head"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}"><div><b>@${safe(p.username||"user")}</b><p class="muted">${safe(p.full_name||"")}</p></div></div><p>${safe(p.bio||"Welcome to Novagram 💜")}</p><div class="profile-stats"><button class="profile-stat-btn" onclick="showFollowList('followers','${p.id}')"><b>${stats.followers}</b>Followers</button><button class="profile-stat-btn" onclick="showFollowList('following','${p.id}')"><b>${stats.following}</b>Following</button></div><button onclick="openUserProfile('${p.id}')">👤 View Profile</button>${mine?"":`<button class="follow-btn ${following?"following":""}" data-follow-user="${p.id}" onclick="toggleFollow('${p.id}')">${following?"Following":"Follow"}</button>`}</div>`
+ if(error){box.textContent=error.message;return}
+ if(!data?.length){box.innerHTML="<p>Koi user nahi mila 💜</p>";return}
+ const ids=data.map(p=>p.id),follows=await getFollowData(ids);
+ box.innerHTML=data.map(p=>{
+  const mine=p.id===currentUser.id,following=!!follows.following[p.id];
+  return `<div class="user-card"><div class="post-head"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80")}"><div><b>@${safe(p.username||"user")}</b><p class="muted">${safe(p.full_name||"")}</p></div></div><p>${safe(p.bio||"Welcome to Novagram 💜")}</p><button onclick="openUserProfile('${p.id}')">👤 View Profile</button>${mine?"":`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${p.id}')">${following?"Following":"Follow"}</button>`}</div>`
  }).join("")
 }
 
-/* OTHER USER PROFILE */
+/* OTHER PROFILE */
 async function openUserProfile(userId){
- if(!currentUser)return message("Pehle login karo");
- currentViewedUser=userId;stopReels();closeFollowList();closeProfileMenu();
+ currentViewedUser=userId;closeFollowList();
  const box=document.getElementById("searchResults");
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
- document.getElementById("searchPage").classList.add("active");box.innerHTML="Profile loading... 💜";
+ document.getElementById("searchPage").classList.add("active");box.innerHTML="Profile loading...";
  const {data:p,error}=await db.from("profiles").select("*").eq("id",userId).maybeSingle();
- if(error){box.textContent="Profile error: "+error.message;return}
- if(!p){box.innerHTML="Profile nahi mili";return}
- const [stats,followResult,postResult]=await Promise.all([
+ if(error||!p){box.textContent=error?.message||"Profile nahi mili";return}
+ const [stats,followResult,result]=await Promise.all([
   getMyFollowStats(userId),
-  userId===currentUser.id?Promise.resolve({data:null,error:null}):db.from("follows").select("id").eq("follower_id",currentUser.id).eq("following_id",userId).maybeSingle(),
+  db.from("follows").select("id").eq("follower_id",currentUser.id).eq("following_id",userId).maybeSingle(),
   db.from("posts").select("*").eq("user_id",userId).order("created_at",{ascending:false})
  ]);
- if(followResult.error){box.textContent=followResult.error.message;return}
- if(postResult.error){box.textContent=postResult.error.message;return}
- const following=!!followResult.data,posts=postResult.data||[];
- const postHTML=posts.length?'<div class="ig-grid">'+posts.map(post=>{
-  const media=isVideoPost(post)?`<video src="${safe(post.media_url)}" muted playsinline preload="metadata"></video><span class="ig-grid-video">▶</span>`:`<img src="${safe(post.media_url)}" alt="Post">`;
-  return `<div class="ig-grid-item" onclick="showOtherProfilePost('${post.id}','${userId}')">${media}</div>`
- }).join("")+'</div>':"<div class='ig-grid-empty'>Abhi koi post nahi hai 💜</div>";
- box.innerHTML=`
- <button class="back-btn" onclick="searchPeople()">← Back to Search</button>
- <div class="ig-profile">
-  <div class="ig-profile-top">
-   <img class="ig-profile-photo" src="${safe(p.avatar_url||"https://placehold.co/120x120?text=User")}">
-   <div class="ig-profile-info"><div class="ig-profile-username">${safe(p.username||"user")}</div><div class="muted">Novagram 💜</div></div>
-  </div>
-  <div class="ig-stats">
-   <div class="ig-stat"><b>${posts.length}</b><span>Posts</span></div>
-   <button class="ig-stat" onclick="showFollowList('followers','${userId}')"><b>${stats.followers}</b><span>Followers</span></button>
-   <button class="ig-stat" onclick="showFollowList('following','${userId}')"><b>${stats.following}</b><span>Following</span></button>
-  </div>
-  <div class="ig-bio"><b>${safe(p.full_name||"Novagram User")}</b><br>${safe(p.bio||"Welcome to Novagram 💜")}</div>
-  ${userId===currentUser.id?"<p class='muted'>Your profile 💜</p>":`<button class="follow-btn ${following?"following":""}" data-follow-user="${userId}" onclick="toggleFollow('${userId}')">${following?"Following":"Follow"}</button>`}
-  <div id="otherFollowList"></div>
- </div>
- ${postHTML}`;
- const oldFollowBox=document.getElementById("followList");if(oldFollowBox)oldFollowBox.remove()
+ if(followResult.error||result.error){box.textContent=(followResult.error||result.error).message;return}
+ const posts=result.data||[],following=!!followResult.data;
+ let grid=posts.length?'<div class="ig-grid">'+posts.map(post=>`<div class="ig-grid-item" onclick="showOtherProfilePost('${post.id}','${userId}')">${isVideoPost(post)?`<video src="${safe(post.media_url)}" muted></video><span class="ig-grid-video">▶</span>`:`<img src="${safe(post.media_url)}">`}</div>`).join("")+'</div>':"<div class='ig-grid-empty'>Abhi koi post nahi hai 💜</div>";
+ box.innerHTML=`<button class="back-btn" onclick="searchPeople()">← Back to Search</button><div class="ig-profile"><div class="ig-profile-top"><img class="ig-profile-photo" src="${safe(p.avatar_url||"https://placehold.co/120x120")}"><div class="ig-profile-info"><div class="ig-profile-username">${safe(p.username||"user")}</div><div class="muted">Novagram 💜</div></div></div><div class="ig-stats"><div class="ig-stat"><b>${posts.length}</b><span>Posts</span></div><button class="ig-stat" onclick="showFollowList('followers','${userId}')"><b>${stats.followers}</b><span>Followers</span></button><button class="ig-stat" onclick="showFollowList('following','${userId}')"><b>${stats.following}</b><span>Following</span></button></div><div class="ig-bio"><b>${safe(p.full_name||"Novagram User")}</b><br>${safe(p.bio||"Welcome to Novagram 💜")}</div>${userId===currentUser.id?"":`<button class="follow-btn ${following?"following":""}" onclick="toggleFollow('${userId}')">${following?"Following":"Follow"}</button>`}<div id="otherFollowList"></div></div>${grid}`
+ const old=document.getElementById("followList");if(old)old.remove()
 }
 async function showOtherProfilePost(postId,userId){
  const {data:post,error}=await db.from("posts").select("*").eq("id",postId).maybeSingle();
- if(error||!post)return message(error?.message||"Post nahi mili");
+ if(error||!post)return message("Post nahi mili");
  const profiles=await getProfiles([post.user_id]),counts=await getCounts([post.id]);
  document.getElementById("searchResults").innerHTML=`<button class="back-btn" onclick="openUserProfile('${userId}')">← Back to Profile</button>`+await postCard(post,profiles[post.user_id],counts)
 }
 
-/* NOTIFICATIONS */
+/* ACTIVITY */
 async function loadActivity(){
  const box=document.getElementById("activity");if(!currentUser)return;
- box.innerHTML="Notifications loading... 💜";
+ box.innerHTML="Notifications loading...";
  const {data,error}=await db.from("notifications").select("*").eq("recipient_id",currentUser.id).order("created_at",{ascending:false}).limit(100);
- if(error){box.textContent="Notification error: "+error.message;return}
- if(!data||data.length===0){box.innerHTML="<div class='notification-card'>Abhi koi notification nahi hai 💜</div>";return}
- const profiles=await getProfiles(data.map(n=>n.actor_id)),labels={follow:"ne tumhe follow kiya 💜",like:"ne tumhari Reel/Post like ki ❤️",comment:"ne tumhari Reel/Post par comment kiya 💬"};
- box.innerHTML=data.map(n=>{
-  const p=profiles[n.actor_id]||{},username=p.username||"user",date=n.created_at?new Date(n.created_at).toLocaleString():"";
-  return `<div class="notification-card" style="${n.is_read?"opacity:.65":""}"><div class="notification-row"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80?text=User")}"><div class="notification-text"><b>@${safe(username)}</b> ${safe(labels[n.type]||"ne activity ki")}<div class="muted">${safe(date)}</div></div>${n.is_read?"":"<span class='notification-dot'>●</span>"}</div>${n.is_read?"":`<button onclick="markNotificationRead('${n.id}')">Mark as read</button>`}</div>`
- }).join("")
-}
-async function markNotificationRead(id){
- const {error}=await db.from("notifications").update({is_read:true}).eq("id",id).eq("recipient_id",currentUser.id);
- if(error)return message(error.message);await loadActivity()
+ if(error){box.textContent=error.message;return}
+ if(!data?.length){box.innerHTML="<div class='notification-card'>Abhi koi notification nahi hai 💜</div>";return}
+ const profiles=await getProfiles(data.map(n=>n.actor_id)),labels={follow:"ne tumhe follow kiya 💜",like:"ne tumhari Post/Reel like ki ❤️",comment:"ne tumhari Post par comment kiya 💬"};
+ box.innerHTML=data.map(n=>{const p=profiles[n.actor_id]||{};return `<div class="notification-card"><div class="notification-row"><img class="avatar" src="${safe(p.avatar_url||"https://placehold.co/80x80")}"><div class="notification-text"><b>@${safe(p.username||"user")}</b> ${safe(labels[n.type]||"ne activity ki")}<div class="muted">${formatDate(n.created_at)}</div></div></div></div>`}).join("")
 }
 
 async function init(){
@@ -814,10 +715,9 @@ async function init(){
 }
 document.addEventListener("click",e=>{
  const menu=document.getElementById("profileMenu");
- if(menu&&!menu.classList.contains("hidden")&&!e.target.closest(".menu-wrap"))closeProfileMenu()
+ if(menu&&!menu.classList.contains("hidden")&&!e.target.closest(".menu-wrap"))menu.classList.add("hidden")
 });
 init();
 </script>
 </body>
 </html>
-
