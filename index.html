@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -9,53 +8,94 @@
 
 <style>
 *{box-sizing:border-box}
-body{margin:0;background:#000;color:#fff;font-family:Arial,sans-serif}
-header{background:#000;color:#a855f7;padding:15px 18px;font-family:cursive;font-size:32px;font-weight:bold;border-bottom:1px solid #252525;position:sticky;top:0;z-index:10}
-.page{display:none;padding:12px 0 90px;background:#000;color:#fff}
+body{margin:0;background:#fff;color:#26202d;font-family:Arial,sans-serif}
+header{
+ background:#fff;color:#7027bd;padding:15px 18px;
+ font-family:cursive;font-size:32px;font-weight:bold;
+ border-bottom:1px solid #eee;position:sticky;top:0;z-index:10;
+ box-shadow:0 2px 8px #00000008
+}
+.page{display:none;padding:12px 0 90px;background:#fff;color:#26202d}
 .page.active{display:block}
-.page h2{padding:0 14px;color:#fff}
-input,textarea{width:100%;padding:12px;margin:7px 0;border:1px solid #444;border-radius:10px;font-size:15px;background:#171717;color:white}
-input::placeholder,textarea::placeholder{color:#aaa}
-button{border:0;border-radius:10px;padding:10px 14px;background:#782bc4;color:white;font-size:14px;cursor:pointer;margin:3px}
+.page h2{padding:0 14px;color:#28133f}
+input,textarea{
+ width:100%;padding:13px;margin:7px 0;border:1px solid #e5d9f2;
+ border-radius:12px;font-size:15px;background:#faf8ff;color:#291344
+}
+input::placeholder,textarea::placeholder{color:#988ba5}
+button{
+ border:0;border-radius:12px;padding:10px 14px;
+ background:#7027bd;color:white;font-size:14px;cursor:pointer;margin:3px
+}
 button:disabled{opacity:.6}
-.card,.user-card,.notification-card{background:#000;color:#fff;border-radius:0;box-shadow:none;border-bottom:1px solid #292929;margin:8px 0;padding:12px}
-.post-head{display:flex;align-items:center;gap:9px;margin-bottom:10px}
-.avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;background:#222;border:2px solid #a855f7}
-.profile-photo{width:90px;height:90px;border-radius:50%;object-fit:cover;border:3px solid #782bc4;display:block;margin:10px auto;cursor:pointer}
-.post-media{width:calc(100% + 24px);max-width:none;margin-left:-12px;max-height:620px;height:auto;object-fit:cover;background:#111;border-radius:0}
-.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.actions button{background:transparent;color:#fff;font-size:15px;padding:8px 5px}
-.actions button.liked{color:#ff315f}
-.muted{color:#aaa;font-size:13px}
+.card,.user-card,.notification-card{
+ background:#fff;color:#241532;border-radius:14px;
+ box-shadow:0 2px 12px #6020a510;
+ border:1px solid #f0e8f8;margin:10px 12px;padding:12px
+}
+.post-head{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.avatar{
+ width:40px;height:40px;border-radius:50%;object-fit:cover;
+ background:#eee;border:2px solid #a855f7
+}
+.profile-photo{
+ width:100px;height:100px;border-radius:50%;object-fit:cover;
+ border:3px solid #782bc4;display:block;margin:10px auto;cursor:pointer
+}
+.post-media{
+ width:100%;max-width:100%;margin:0;
+ max-height:620px;height:auto;object-fit:cover;
+ background:#f5f0ff;border-radius:12px
+}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:9px;border-top:1px solid #f0e8f8;padding-top:7px}
+.actions button{background:transparent;color:#352044;font-size:14px;padding:8px 5px;margin:0}
+.actions button.liked{color:#ed286b}
+.muted{color:#8b8194;font-size:13px}
 .hidden{display:none!important}
-#status{padding:8px;color:#c084fc;font-size:13px}
-nav{position:fixed;bottom:0;left:0;right:0;background:#000;border-top:1px solid #292929;display:flex;justify-content:space-around;padding:7px 2px calc(7px + env(safe-area-inset-bottom));z-index:20}
-nav button{background:#000;color:#fff;font-size:11px;margin:0;padding:5px 1px;flex:1}
-nav span{display:block;font-size:25px;margin-bottom:3px}
-nav button:active{color:#b45cff}
-.follow-btn{background:#782bc4;color:white}
-.follow-btn.following{background:#292929;color:white}
-.profile-stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0;color:white}
-.profile-stats b{display:block;font-size:19px}
-.profile-stat-btn{background:transparent!important;color:white!important;margin:0;padding:5px;display:flex;flex-direction:column;align-items:center}
-.user-card{border-radius:12px;margin:12px;padding:13px}
+#status{padding:8px 12px;color:#7027bd;font-size:13px}
+nav{
+ position:fixed;bottom:0;left:0;right:0;background:#fff;
+ border-top:1px solid #eee;display:flex;justify-content:space-around;
+ padding:7px 2px calc(7px + env(safe-area-inset-bottom));z-index:20;
+ box-shadow:0 -3px 12px #00000008
+}
+nav button{
+ background:#fff;color:#5b4b68;font-size:11px;margin:0;
+ padding:5px 1px;flex:1;border-radius:10px
+}
+nav span{display:block;font-size:25px;margin-bottom:3px;color:#7027bd}
+nav button:active{color:#a855f7}
+.follow-btn{background:#7027bd;color:white}
+.follow-btn.following{background:#f0eaf6;color:#7027bd;border:1px solid #d8c5eb}
+.profile-stats{display:flex;justify-content:space-around;text-align:center;margin:15px 0;color:#352044}
+.profile-stats b{display:block;font-size:19px;color:#241532}
+.profile-stat-btn{background:transparent!important;color:#352044!important;margin:0;padding:5px;display:flex;flex-direction:column;align-items:center}
+.user-card{border-radius:14px;margin:12px;padding:13px}
 .user-card .post-head{margin:0}
-.user-name{cursor:pointer;color:white}
-.back-btn{background:#333;color:white}
+.user-name{cursor:pointer;color:#7027bd}
+.back-btn{background:#eee8f5;color:#51227c}
 .profile-top{display:flex;justify-content:space-between;align-items:center;position:relative;padding:0 12px}
 .profile-top h2{margin:8px 0}
 .menu-wrap{position:relative}
-.menu-btn{background:#222;color:white;font-size:25px;padding:5px 14px}
-.profile-menu{position:absolute;right:0;top:43px;z-index:50;background:#171717;border:1px solid #444;box-shadow:0 3px 16px #0003;border-radius:12px;padding:7px;min-width:180px}
-.profile-menu button{display:block;width:100%;text-align:left;background:#171717;color:white;padding:12px;margin:0}
-.profile-menu button:hover{background:#292929}
+.menu-btn{background:#f3eafa;color:#7027bd;font-size:25px;padding:5px 14px}
+.profile-menu{
+ position:absolute;right:0;top:43px;z-index:50;background:white;
+ border:1px solid #eee;box-shadow:0 3px 16px #0002;
+ border-radius:12px;padding:7px;min-width:180px
+}
+.profile-menu button{display:block;width:100%;text-align:left;background:white;color:#352044;padding:12px;margin:0}
+.profile-menu button:hover{background:#f7f1fc}
 #followList{margin-top:15px}
 .follow-list-head{display:flex;justify-content:space-between;align-items:center}
 .follow-list-head h3{margin:5px}
-.user-list-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:#171717;border-radius:12px;padding:10px;margin:8px 0}
+.user-list-row{
+ display:flex;align-items:center;justify-content:space-between;gap:8px;
+ background:#faf8ff;border:1px solid #eee5f7;border-radius:12px;padding:10px;margin:8px 0
+}
 .user-list-info{display:flex;align-items:center;gap:9px;min-width:0}
 .user-list-info div{min-width:0;overflow-wrap:anywhere}
 
+/* REELS */
 #reelsPage{padding:0;background:#000;height:calc(100dvh - 115px);overflow:hidden}
 #reelsPage h2{display:none}
 #reels{height:100%;width:100%;overflow-y:auto;overflow-x:hidden;scroll-snap-type:y mandatory;overscroll-behavior-y:contain;scrollbar-width:none}
@@ -76,12 +116,13 @@ nav button:active{color:#b45cff}
 .play-indicator{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:55px;color:white;background:#0005;border-radius:50%;padding:12px;display:none;pointer-events:none}
 .reel.paused .play-indicator{display:block}
 
-#commentsModal{position:fixed;inset:0;background:#000b;z-index:1000;display:none;align-items:flex-end;justify-content:center}
+/* COMMENTS */
+#commentsModal{position:fixed;inset:0;background:#0009;z-index:1000;display:none;align-items:flex-end;justify-content:center}
 #commentsModal.open{display:flex}
-.comment-sheet{background:#151515;width:100%;max-width:600px;height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:white;overflow:hidden}
-.comment-top{padding:12px;text-align:center;border-bottom:1px solid #333;font-weight:bold;font-size:17px;background:#151515;color:white}
-.comment-handle{width:42px;height:4px;background:#777;border-radius:10px;margin:0 auto 10px}
-#commentList{flex:1;overflow-y:auto;padding:12px;background:#151515}
+.comment-sheet{background:#fff;width:100%;max-width:600px;height:78vh;border-radius:20px 20px 0 0;display:flex;flex-direction:column;color:#241532;overflow:hidden}
+.comment-top{padding:12px;text-align:center;border-bottom:1px solid #eee;font-weight:bold;font-size:17px;background:#fff;color:#241532}
+.comment-handle{width:42px;height:4px;background:#ccc;border-radius:10px;margin:0 auto 10px}
+#commentList{flex:1;overflow-y:auto;padding:12px;background:#fff}
 .comment-row{display:flex;gap:10px;margin:17px 0;align-items:flex-start}
 .comment-avatar{width:38px;height:38px;border-radius:50%;object-fit:cover;flex-shrink:0}
 .comment-content{flex:1;min-width:0;font-size:14px}
@@ -89,17 +130,18 @@ nav button:active{color:#b45cff}
 .comment-time{color:#999;font-size:11px}
 .comment-text{line-height:1.5;overflow-wrap:anywhere}
 .comment-tools{display:flex;gap:15px;margin-top:8px;align-items:center}
-.comment-tools button{background:none;color:#bbb;padding:0;font-size:12px;margin:0}
-.comment-heart{background:none!important;color:#bbb!important;font-size:19px!important;padding:0!important}
+.comment-tools button{background:none;color:#777;padding:0;font-size:12px;margin:0}
+.comment-heart{background:none!important;color:#777!important;font-size:19px!important;padding:0!important}
 .comment-heart.liked{color:#ed286b!important}
-.comment-footer{border-top:1px solid #333;padding:10px;background:#151515}
+.comment-footer{border-top:1px solid #eee;padding:10px;background:#fff}
 .comment-emojis{display:flex;justify-content:space-around;font-size:23px;margin-bottom:10px}
 .comment-emojis span{cursor:pointer}
 .comment-input-row{display:flex;gap:7px;align-items:center}
-.comment-input-row input{margin:0;border-radius:25px;flex:1;background:#252525;color:white;min-width:0}
+.comment-input-row input{margin:0;border-radius:25px;flex:1;background:#f7f3fa;color:#241532;min-width:0}
 .comment-input-row button{border-radius:20px;font-weight:bold}
 
-.activity-title{font-size:19px;font-weight:bold;margin:8px 12px 15px}
+/* ACTIVITY */
+.activity-title{font-size:19px;font-weight:bold;margin:8px 12px 15px;color:#28133f}
 .notification-card{border-radius:12px;padding:13px;margin:10px 12px}
 .notification-row{display:flex;gap:10px;align-items:center}
 .notification-text{flex:1;font-size:14px;line-height:1.5}
@@ -107,22 +149,36 @@ nav button:active{color:#b45cff}
 
 /* STORIES */
 .story-circle{
- width:76px;height:76px;border-radius:50%;
+ width:82px;height:82px;border-radius:50%;
  border:3px solid transparent;
- background:linear-gradient(#000,#000) padding-box,linear-gradient(45deg,#ffb000,#ff168e,#9b36ff) border-box;
+ background:linear-gradient(#fff,#fff) padding-box,linear-gradient(45deg,#ffb000,#ff168e,#9b36ff) border-box;
  padding:3px;object-fit:cover;flex-shrink:0
 }
-.story-item{text-align:center;min-width:78px;font-size:12px;cursor:pointer;color:white}
-.story-strip{display:flex;gap:14px;overflow-x:auto;padding:12px 8px}
+.story-item{text-align:center;min-width:82px;font-size:12px;cursor:pointer;color:#28133f}
+.story-strip{display:flex;gap:13px;overflow-x:auto;padding:12px 8px}
 .story-strip::-webkit-scrollbar{display:none}
-#homePage>.card:first-of-type{border-bottom:1px solid #292929;padding:10px 8px}
-#homePage>.card:first-of-type h3{color:#c084fc;margin:4px 8px}
+#homePage>.card:first-of-type{
+ border:0;border-bottom:1px solid #eee;border-radius:0;
+ box-shadow:none;padding:10px 8px;margin:0
+}
+#homePage>.card:first-of-type h3{color:#7027bd;margin:4px 8px}
+#homePage>h2{
+ background:linear-gradient(110deg,#7027bd,#a855f7);
+ color:white;border-radius:14px;margin:8px 12px;padding:16px;
+ font-size:19px
+}
 #storyViewer{position:fixed;inset:0;background:#000;z-index:2000;color:white;padding:15px;text-align:center;display:none}
 #storyViewer.open{display:block}
 #storyContent{height:75vh;display:flex;align-items:center;justify-content:center}
 #storyContent img,#storyContent video{max-width:100%;max-height:100%;object-fit:contain;border-radius:12px}
 .story-viewer-top{display:flex;justify-content:space-between;align-items:center}
 #storyViewers{max-height:70px;overflow:auto;font-size:13px;margin-top:8px}
+
+/* AUTH AND ADD */
+#authPage .card,#addPage .card{margin:14px;border-radius:18px;padding:18px}
+#authPage h2{color:#7027bd}
+#authPage button,#addPage button{background:#7027bd;color:#fff;padding:12px 18px}
+hr{border:0;border-top:1px solid #eee}
 </style>
 </head>
 
@@ -141,7 +197,7 @@ nav button:active{color:#b45cff}
 </section>
 
 <section id="homePage" class="page">
-<h2>🏠 Home Feed</h2>
+<h2>💜 Welcome to Novagram!<br>Connect • Share • Discover 🚀</h2>
 <div class="card">
 <h3>💜 Novagram Stories</h3>
 <input id="storyFile" type="file" accept="image/*,video/*">
@@ -175,7 +231,7 @@ nav button:active{color:#b45cff}
 </section>
 
 <section id="activityPage" class="page">
-<div class="activity-title">🔔 Notifications</div>
+<div class="activity-title">♡ Activity</div>
 <div id="activity">Novagram activity 💜</div>
 </section>
 
@@ -521,7 +577,7 @@ async function showFollowList(type,userId=currentUser?.id){
  if(!currentUser||!userId)return message("Pehle login karo");
  currentFollowListType=type;
  currentFollowListUser=userId;
- const box=document.getElementById("followList");
+ const box=document.getElementById("followList")||document.getElementById("otherFollowList");
  if(!box)return;
  box.innerHTML="<p>Loading... 💜</p>";
  const column=type==="followers"?"following_id":"follower_id";
@@ -554,6 +610,8 @@ function closeFollowList(){
  currentFollowListUser=null;
  const box=document.getElementById("followList");
  if(box)box.innerHTML="";
+ const other=document.getElementById("otherFollowList");
+ if(other)other.innerHTML="";
 }
 
 /* PROFILE MENU */
@@ -601,7 +659,7 @@ async function postCard(post,profile,counts){
  ${mediaHTML(post)}
  <p>${safe(post.caption)}</p>
  <div class="actions">
- <button class="${liked?"liked":""}" onclick="toggleLike('${post.id}')">♡ Like (${likeCount})</button>
+ <button class="${liked?"liked":""}" onclick="toggleLike('${post.id}')">${liked?"❤️":"♡"} Like (${likeCount})</button>
  <button onclick="addComment('${post.id}')">💬 Comment (${commentCount})</button>
  <button onclick="sharePost('${post.id}')">➤ Share</button>
  ${mine?`<button onclick="deletePost('${post.id}')">Delete</button>`:""}
@@ -1053,3 +1111,4 @@ init();
 </script>
 </body>
 </html>
+
